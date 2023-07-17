@@ -109,9 +109,20 @@ export default function Home() {
     setFormData({ ...formData, [id]: value });
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(formData);
+    let response = await fetch('/api/checkLogin', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(formData)
+    });
+    if (response.status == 200) {
+      console.log('Authorized');
+    } else if (response.status == 400) {
+      console.log('Incorrect username or password');
+    }
   }
 
 
@@ -119,14 +130,14 @@ export default function Home() {
     <form onSubmit={ handleSubmit }>
       <div className={styles['login-field']}>
         <label htmlFor="username">Username</label>
-        <input id="username" type="text" placeholder="Username" onChange={ handleChange } />
+        <input id="username" type="text" placeholder="Username" onChange={ handleChange } required />
         <label htmlFor="password">Password</label>
-        <input id="password" type="password" placeholder="Password" onChange={ handleChange }/>
+        <input id="password" type="password" placeholder="Password" onChange={ handleChange } required/>
       </div>
-
+ 
       <div className={ styles['date-field'] }>
         <label htmlFor="date">Date</label>
-        <select id="date" defaultValue={ threeDaysString } onChange={ handleChange }>
+        <select id="date" defaultValue={ threeDaysString } onChange={ handleChange } required >
           <option value={ threeDaysString }>{ threeDaysString }</option>
           <option value={ twoDaysString }>{ twoDaysString }</option>
         </select>
@@ -134,12 +145,12 @@ export default function Home() {
 
       <div className={ styles['time-field'] }>
         <label htmlFor="startTime">Start Time</label>
-        <select id="startTime" defaultValue={ timeOptions[22] } onChange={ handleChange }>
-          { timeOptions.map((time) => <option value={ time }>{ time }</option>) }
+        <select id="startTime" defaultValue={ timeOptions[22] } onChange={ handleChange } required >
+          { timeOptions.map((time, idx) => <option value={ time } key={ idx }>{ time }</option>) }
         </select>
         <label htmlFor="endTime">End Time</label>
-        <select id="endTime" defaultValue={ timeOptions[timeOptions.length - 1] } onChange={ handleChange }>
-          { timeOptions.map((time) => <option value={ time }>{ time }</option>) }
+        <select id="endTime" defaultValue={ timeOptions[timeOptions.length - 1] } onChange={ handleChange } required >
+          { timeOptions.map((time, idx) => <option value={ time } key={ idx }>{ time }</option>) }
         </select>
       </div>
 

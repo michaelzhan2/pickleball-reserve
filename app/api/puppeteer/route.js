@@ -8,6 +8,12 @@ export async function GET() {
   // TODO: take user input for time
   // TODO: take user input for court preference order
 
+  const body = await request.json();
+  const { username, password, date, startTime, endTime } = body;
+
+  var responseBody;
+  var responseStatus;
+
   const browser = await puppeteer.launch({
     headless: 'new',
     userDataDir: './user_data',
@@ -26,16 +32,12 @@ export async function GET() {
     await login.evaluate((el) => el.click());
     await page.waitForNetworkIdle();
   
+
+    const usernameField = await page.waitForSelector('#weblogin_username');
+    const passwordField = await page.waitForSelector('#weblogin_password');
   
-  
-    // const user = 'ming.zhan';
-    // const pass = '########';
-  
-    // const username = await page.waitForSelector('#weblogin_username');
-    // const password = await page.waitForSelector('#weblogin_password');
-  
-    // await username.type(user);
-    // await password.type(pass);
+    await usernameField.type(username);
+    await passwordField.type(password);
   
     const submit = await page.waitForSelector('#weblogin_buttonlogin');
     await submit.evaluate((el) => el.click());
