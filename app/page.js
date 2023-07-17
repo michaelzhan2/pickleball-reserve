@@ -1,12 +1,17 @@
 'use client'
 
 
-import Image from 'next/image'
 import styles from './page.module.css'
 import { useState } from 'react'
+import * as Math from 'mathjs'
 
 
 function generateDateOptions (curDate) {
+  /*
+  * Generates the date options for the date field
+  * @param {Date} curDate - The current date
+  * @return {Array} - An array of two strings representing the date options
+  */
   const twoDays = new Date();
   const threeDays = new Date();
 
@@ -54,14 +59,49 @@ function generateDateOptions (curDate) {
 }
 
 
+function generateTimeOptions () {
+  // Generate a list of time options in 30 minute intervals from 8:00 AM to 10:00 PM
+  const timeOptions = [];
+  
+  var time = 8;
+
+  while (time <= 22) {
+    const hour = Math.floor(time);
+    const minute = (time - hour) * 60;
+
+    const ampm = hour < 12 ? 'AM' : 'PM';
+    const hour12 = hour > 12 ? hour - 12 : hour;
+
+    const hourString = hour12 < 10 ? `0${hour12}` : `${hour12}`;
+    const minuteString = minute < 10 ? `0${minute}` : `${minute}`;
+    
+
+    const timeString = `${hourString}:${minuteString} ${ampm}`;
+    timeOptions.push(timeString);
+
+    time += 0.5;
+  }
+
+  return timeOptions;
+}
+
+
 export default function Home() {
+  /*
+  * The main page component
+  * @return {JSX} - The main page component
+  */
   const curDate = new Date();
   const [twoDaysString, threeDaysString] = generateDateOptions(curDate);
+
+  const timeOptions = generateTimeOptions();
 
   const [formData, setFormData] = useState({
     username: '',
     password: '',
-    date: threeDaysString
+    date: threeDaysString,
+    startTime: timeOptions[22],
+    endTime: timeOptions[timeOptions.length - 1]
   });
 
   const handleChange = (e) => {
@@ -89,6 +129,17 @@ export default function Home() {
         <select id="date" defaultValue={ threeDaysString } onChange={ handleChange }>
           <option value={ threeDaysString }>{ threeDaysString }</option>
           <option value={ twoDaysString }>{ twoDaysString }</option>
+        </select>
+      </div>
+
+      <div className={ styles['time-field'] }>
+        <label htmlFor="startTime">Start Time</label>
+        <select id="startTime" defaultValue={ timeOptions[22] } onChange={ handleChange }>
+          { timeOptions.map((time) => <option value={ time }>{ time }</option>) }
+        </select>
+        <label htmlFor="endTime">End Time</label>
+        <select id="endTime" defaultValue={ timeOptions[timeOptions.length - 1] } onChange={ handleChange }>
+          { timeOptions.map((time) => <option value={ time }>{ time }</option>) }
         </select>
       </div>
 

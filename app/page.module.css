@@ -4,8 +4,13 @@
     width: 300px;
 }
 
-
 .date-field {
+    display: flex;
+    flex-direction: column;
+    width: 300px;
+}
+
+.time-field {
     display: flex;
     flex-direction: column;
     width: 300px;
