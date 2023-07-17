@@ -37,9 +37,12 @@ export async function POST(request) {
     await page.waitForNetworkIdle();
     
 
-    const errorMessage = await page.waitForSelector('.message.error');
-    if (errorMessage) {
-      responseStatus = 401;
+    const errorMessageExists = await page.evaluate(() => {
+      const errorMessage = document.querySelector('.message.error');
+      return errorMessage !== null;
+    });
+    if (errorMessageExists) {
+      responseStatus = 400;
       responseBody = 'Invalid username or password';
     } else {
       responseStatus = 200;
