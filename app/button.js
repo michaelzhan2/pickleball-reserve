@@ -1,10 +1,7 @@
 'use client'
 
 
-export default function Button({ username, password }) {
-  function handleClick() {
-    console.log({ username, password });
-  }
+export default function Button() {
   // async function handleClick() {
   //   const res = await fetch('/api/puppeteer', { method: 'GET' })
   //   const text = await res.text()
@@ -13,7 +10,7 @@ export default function Button({ username, password }) {
   // }
   return (
     <div>
-      <button type="button" onClick={handleClick}>
+      <button type="submit">
         Click me
       </button>
     </div>
