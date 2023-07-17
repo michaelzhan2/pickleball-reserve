@@ -3,12 +3,7 @@
 
 import Image from 'next/image'
 import styles from './page.module.css'
-
-
-function handleSubmit (e) {
-  
-  console.log('form submitted')
-}
+import { useState } from 'react'
 
 
 function generateDateOptions (curDate) {
@@ -23,7 +18,7 @@ function generateDateOptions (curDate) {
     1: 'Monday',
     2: 'Tuesday',
     3: 'Wednesday',
-    4: 'Thurday',
+    4: 'Thursday',
     5: 'Friday',
     6: 'Saturday'
   }
@@ -63,20 +58,37 @@ export default function Home() {
   const curDate = new Date();
   const [twoDaysString, threeDaysString] = generateDateOptions(curDate);
 
+  const [formData, setFormData] = useState({
+    username: '',
+    password: '',
+    date: threeDaysString
+  });
+
+  const handleChange = (e) => {
+    const { id, value } = e.target;
+    setFormData({ ...formData, [id]: value });
+  }
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log(formData);
+  }
+
+
   return (
     <form onSubmit={ handleSubmit }>
       <div className={styles['login-field']}>
         <label htmlFor="username">Username</label>
-        <input id="username" type="text" placeholder="Username" />
+        <input id="username" type="text" placeholder="Username" onChange={ handleChange } />
         <label htmlFor="password">Password</label>
-        <input id="password" type="password" placeholder="Password" />
+        <input id="password" type="password" placeholder="Password" onChange={ handleChange }/>
       </div>
 
       <div className={ styles['date-field'] }>
         <label htmlFor="date">Date</label>
-        <select id="date" defaultValue={0}>
-          <option value="threeDays">{ threeDaysString }</option>
-          <option value="twoDays">{ twoDaysString }</option>
+        <select id="date" defaultValue={ threeDaysString } onChange={ handleChange }>
+          <option value={ threeDaysString }>{ threeDaysString }</option>
+          <option value={ twoDaysString }>{ twoDaysString }</option>
         </select>
       </div>
 
