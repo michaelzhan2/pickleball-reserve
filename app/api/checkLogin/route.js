@@ -22,7 +22,7 @@ export async function POST(request) {
   const { username, password, date, startTimeIdx, endTimeIdx } = body;
 
   const browser = await puppeteer.launch({
-    headless: false
+    headless: 'new'
   });
 
   var responseBody;

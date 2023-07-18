@@ -1,3 +1,5 @@
+import { start } from 'repl';
+
 const puppeteer = require('puppeteer');
 const fs = require('fs');
 
@@ -34,7 +36,7 @@ function dateToQuery(date) {
     'December': '12'
   }
 
-  dateList = date.split(' ');
+  const dateList = date.split(' ');
   const month = monthToNum[dateList[1]];
   const day = dateList[2].slice(0, -1);
   const year = dateList[3];
@@ -52,7 +54,7 @@ function generateTimeBlocks () {
     const hour = Math.floor(time);
     const minute = (time - hour) * 60;
 
-    const ampm = hour < 12 ? 'AM' : 'PM';
+    const ampm = hour < 12 ? 'am' : 'pm';
     const hour12 = hour > 12 ? hour - 12 : hour;
 
     const hourString = hour12 < 10 ? ` ${hour12}` : `${hour12}`;
@@ -76,10 +78,10 @@ function generateTimeBlocks () {
 
 
 export async function POST(request) {
-  // TODO: take user input for time
-
   const body = await request.json();
-  const { username, password, date, startTimeIdx, endTimeIdx } = body;
+  const { username, password, date, startTimeIdxString, endTimeIdxString } = body;
+  const startTimeIdx = parseInt(startTimeIdxString);
+  const endTimeIdx = parseInt(endTimeIdxString);
 
   const courtOrder = [14, 12, 15, 17, 13, 16];
   const timeBlocks = generateTimeBlocks();
@@ -140,15 +142,24 @@ export async function POST(request) {
     for (var window = 3; window > 0; window--) {
       for (var timeIdx = startTimeIdx; timeIdx <= endTimeIdx - window; timeIdx++) {
         for (const courtNum of courtOrder) {
-          const court = await page.waitForSelector(`#crwebsearch_nextgenresultsgroup > div.rect.group__inner > div:nth-child(${courtNum})`);
+          const courtSelector = `#crwebsearch_nextgenresultsgroup > div.rect.group__inner > div:nth-child(${courtNum})`;
+          const court = await page.waitForSelector(courtSelector);
 
           // check if the time block is available
           var validTimes = true;
           for (var i = timeIdx; i < timeIdx + window; i++) {
-            const timeBlockExists = await page.evaluate((timeBlock) => {
-              const timeElement = document.querySelector(`::-p-text(${timeBlock})`);
-              return timeElement !== null;
-            }, timeBlocks[i]);
+            const timeBlockExists = await page.evaluate((courtSelector, timeBlock) => {
+              const court = document.querySelector(courtSelector);
+              const courtTimeOptions = court.querySelectorAll('tbody > tr:nth-child(2) a');
+              blockFound = false;
+              for (const courtTimeOption of courtTimeOptions) {
+                if (courtTimeOption.textContent === timeBlock) {
+                  blockFound = true;
+                  break;
+                }
+              }
+              return blockFound;
+            }, courtSelector, timeBlocks[i]);
             if (!timeBlockExists) {
               validTimes = false;
               break;
@@ -157,7 +168,7 @@ export async function POST(request) {
           if (!validTimes) {
             continue;
           }
-
+          console.log(timeIdx, timeIdx + window - 1, courtNum - 11)
           // select the time block
           for (var i = timeIdx; i < timeIdx + window; i++) {
             const time = await court.waitForSelector(`::-p-text(${timeBlocks[i]})`);
@@ -179,6 +190,7 @@ export async function POST(request) {
 
           success = true;
           break;
+
         }
         if (success) {
           break;
@@ -188,7 +200,6 @@ export async function POST(request) {
         break;
       }
     }
-
     const logout = await page.waitForSelector('#menu_myaccount > ul > li > div > ul > li:nth-child(4) > ul > li:nth-child(4) > a');
     await logout.evaluate((el) => el.click());
     await page.waitForNetworkIdle();
@@ -204,8 +215,8 @@ export async function POST(request) {
   }
   catch (e) {
     console.log(e);
-    responseBody = 'Reservation unsuccessful';
-    responseStatus = 400;
+    responseBody = 'Internal server error';
+    responseStatus = 500;
   }
   finally {
     await browser.close();

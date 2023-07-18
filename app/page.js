@@ -12,9 +12,11 @@ function generateDateOptions (curDate) {
   * @param {Date} curDate - The current date
   * @return {Array} - An array of two strings representing the date options
   */
+  const oneDay = new Date();
   const twoDays = new Date();
   const threeDays = new Date();
 
+  oneDay.setDate(curDate.getDate() + 1);
   twoDays.setDate(curDate.getDate() + 2);
   threeDays.setDate(curDate.getDate() + 3);
 
@@ -43,22 +45,27 @@ function generateDateOptions (curDate) {
     11: 'December'
   }
 
+  const oneDayDay = dayOfWeek[oneDay.getDay()];
   const twoDaysDay = dayOfWeek[twoDays.getDay()];
   const threeDaysDay = dayOfWeek[threeDays.getDay()];
 
+  const oneDayMonth = monthOfYear[oneDay.getMonth()];
   const twoDaysMonth = monthOfYear[twoDays.getMonth()];
   const threeDaysMonth = monthOfYear[threeDays.getMonth()];
 
+  const oneDayDate = oneDay.getDate();
   const twoDaysDate = twoDays.getDate();
   const threeDaysDate = threeDays.getDate();
 
+  const oneDayYear = oneDay.getFullYear();
   const twoDaysYear = twoDays.getFullYear();
   const threeDaysYear = threeDays.getFullYear();
 
+  const oneDayString = `${oneDayDay}, ${oneDayMonth} ${oneDayDate}, ${oneDayYear}`;
   const twoDaysString = `${twoDaysDay}, ${twoDaysMonth} ${twoDaysDate}, ${twoDaysYear}`;
   const threeDaysString = `${threeDaysDay}, ${threeDaysMonth} ${threeDaysDate}, ${threeDaysYear}`;
 
-  return [twoDaysString, threeDaysString];
+  return [oneDayString, twoDaysString, threeDaysString];
 }
 
 
@@ -95,7 +102,7 @@ export default function Home() {
   * @return {JSX} - The main page component
   */
   const curDate = new Date();
-  const [twoDaysString, threeDaysString] = generateDateOptions(curDate);
+  const [oneDayString, twoDaysString, threeDaysString] = generateDateOptions(curDate);
 
   const timeOptions = generateTimeOptions();
 
@@ -103,8 +110,8 @@ export default function Home() {
     username: '',
     password: '',
     date: threeDaysString,
-    startTime: timeOptions[22],
-    endTime: timeOptions[timeOptions.length - 1]
+    startTimeIdxString: 22,
+    endTimeIdxString: timeOptions.length - 1
   });
 
   const handleChange = (e) => {
@@ -127,16 +134,16 @@ export default function Home() {
     //   console.log('Incorrect username or password');
     //   return;
     // }
-    let response = await fetch('/api/puppeteer', {
+    let reservationResponse = await fetch('/api/puppeteer', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(formData)
     });
-    if (response.status == 200) {
+    if (reservationResponse.status == 200) {
       console.log('Puppeteer script ran successfully');
-    } else if (response.status == 400) {
+    } else if (reservationResponse.status == 400) {
       console.log('Puppeteer script failed to run');
       return;
     }
@@ -157,16 +164,17 @@ export default function Home() {
         <select id="date" defaultValue={ threeDaysString } onChange={ handleChange } required >
           <option value={ threeDaysString }>{ threeDaysString }</option>
           <option value={ twoDaysString }>{ twoDaysString }</option>
+          <option value={ oneDayString }>{ oneDayString }</option>
         </select>
       </div>
 
       <div className={ styles['time-field'] }>
-        <label htmlFor="startTimeIdx">Start Time</label>
-        <select id="startTimeIdx" defaultValue={ 22 } onChange={ handleChange } required >
+        <label htmlFor="startTimeIdxString">Start Time</label>
+        <select id="startTimeIdxString" defaultValue={ 22 } onChange={ handleChange } required >
           { timeOptions.map((time, idx) => <option value={ idx } key={ idx }>{ time }</option>) }
         </select>
-        <label htmlFor="endTimeIdx">End Time</label>
-        <select id="endTimeIdx" defaultValue={ timeOptions.length - 1 } onChange={ handleChange } required >
+        <label htmlFor="endTimeIdxString">End Time</label>
+        <select id="endTimeIdxString" defaultValue={ timeOptions.length - 1 } onChange={ handleChange } required >
           { timeOptions.map((time, idx) => <option value={ idx } key={ idx }>{ time }</option>) }
         </select>
       </div>
