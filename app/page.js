@@ -157,10 +157,6 @@ export default function Home() {
     startCron();
   }
 
-  const handleStopCron = () => {
-    stopCron();
-  }
-
   return (
     <>
     <form onSubmit={ handleSubmit }>
@@ -194,7 +190,6 @@ export default function Home() {
       <button type="submit">Submit</button>
     </form>
     <button type='button' onClick={ handleCron }>Cron</button>
-    <button type='button' onClick={ handleStopCron }>Stop try Cron</button>
     </>
   )
 }
