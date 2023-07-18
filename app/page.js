@@ -52,8 +52,11 @@ function generateDateOptions (curDate) {
   const twoDaysDate = twoDays.getDate();
   const threeDaysDate = threeDays.getDate();
 
-  const twoDaysString = `${twoDaysDay}, ${twoDaysMonth} ${twoDaysDate}`;
-  const threeDaysString = `${threeDaysDay}, ${threeDaysMonth} ${threeDaysDate}`;
+  const twoDaysYear = twoDays.getFullYear();
+  const threeDaysYear = threeDays.getFullYear();
+
+  const twoDaysString = `${twoDaysDay}, ${twoDaysMonth} ${twoDaysDate}, ${twoDaysYear}`;
+  const threeDaysString = `${threeDaysDay}, ${threeDaysMonth} ${threeDaysDate}, ${threeDaysYear}`;
 
   return [twoDaysString, threeDaysString];
 }
@@ -111,7 +114,20 @@ export default function Home() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    let response = await fetch('/api/checkLogin', {
+    // let loginCheckResponse = await fetch('/api/checkLogin', {
+    //   method: 'POST',
+    //   headers: {
+    //     'Content-Type': 'application/json'
+    //   },
+    //   body: JSON.stringify(formData)
+    // });
+    // if (loginCheckResponse.status == 200) {
+    //   console.log('Login authorized');
+    // } else if (loginCheckResponse.status == 400) {
+    //   console.log('Incorrect username or password');
+    //   return;
+    // }
+    let response = await fetch('/api/puppeteer', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -119,9 +135,10 @@ export default function Home() {
       body: JSON.stringify(formData)
     });
     if (response.status == 200) {
-      console.log('Authorized');
+      console.log('Puppeteer script ran successfully');
     } else if (response.status == 400) {
-      console.log('Incorrect username or password');
+      console.log('Puppeteer script failed to run');
+      return;
     }
   }
 
@@ -144,13 +161,13 @@ export default function Home() {
       </div>
 
       <div className={ styles['time-field'] }>
-        <label htmlFor="startTime">Start Time</label>
-        <select id="startTime" defaultValue={ timeOptions[22] } onChange={ handleChange } required >
-          { timeOptions.map((time, idx) => <option value={ time } key={ idx }>{ time }</option>) }
+        <label htmlFor="startTimeIdx">Start Time</label>
+        <select id="startTimeIdx" defaultValue={ 22 } onChange={ handleChange } required >
+          { timeOptions.map((time, idx) => <option value={ idx } key={ idx }>{ time }</option>) }
         </select>
-        <label htmlFor="endTime">End Time</label>
-        <select id="endTime" defaultValue={ timeOptions[timeOptions.length - 1] } onChange={ handleChange } required >
-          { timeOptions.map((time, idx) => <option value={ time } key={ idx }>{ time }</option>) }
+        <label htmlFor="endTimeIdx">End Time</label>
+        <select id="endTimeIdx" defaultValue={ timeOptions.length - 1 } onChange={ handleChange } required >
+          { timeOptions.map((time, idx) => <option value={ idx } key={ idx }>{ time }</option>) }
         </select>
       </div>
 
