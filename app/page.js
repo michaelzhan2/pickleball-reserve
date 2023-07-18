@@ -119,8 +119,11 @@ export default function Home() {
     setFormData({ ...formData, [id]: value });
   }
 
+
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     // let loginCheckResponse = await fetch('/api/checkLogin', {
     //   method: 'POST',
     //   headers: {
@@ -134,23 +137,24 @@ export default function Home() {
     //   console.log('Incorrect username or password');
     //   return;
     // }
-    let reservationResponse = await fetch('/api/puppeteer', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(formData)
-    });
-    if (reservationResponse.status == 200) {
-      console.log('Puppeteer script ran successfully');
-    } else if (reservationResponse.status == 400) {
-      console.log('Puppeteer script failed to run');
-      return;
-    }
+    // let reservationResponse = await fetch('/api/puppeteer', {
+    //   method: 'POST',
+    //   headers: {
+    //     'Content-Type': 'application/json'
+    //   },
+    //   body: JSON.stringify(formData)
+    // });
+    // if (reservationResponse.status == 200) {
+    //   console.log('Puppeteer script ran successfully');
+    // } else if (reservationResponse.status == 400) {
+    //   console.log('Puppeteer script failed to run');
+    //   return;
+    // }
   }
 
 
   return (
+    <>
     <form onSubmit={ handleSubmit }>
       <div className={styles['login-field']}>
         <label htmlFor="username">Username</label>
@@ -181,5 +185,6 @@ export default function Home() {
 
       <button type="submit">Submit</button>
     </form>
+    </>
   )
 }

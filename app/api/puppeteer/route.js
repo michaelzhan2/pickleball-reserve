@@ -1,8 +1,4 @@
-import { start } from 'repl';
-
 const puppeteer = require('puppeteer');
-const fs = require('fs');
-
 
 async function checkPage(page) {
   for (let count = 0; count < 10; count++) {
