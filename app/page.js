@@ -4,6 +4,7 @@
 import styles from './page.module.css'
 import { useState } from 'react'
 import * as Math from 'mathjs'
+import { startCron, stopCron } from './utils/cron.js'
 
 
 function generateDateOptions (curDate) {
@@ -152,6 +153,13 @@ export default function Home() {
     }
   }
 
+  const handleCron = () => {
+    startCron();
+  }
+
+  const handleStopCron = () => {
+    stopCron();
+  }
 
   return (
     <>
@@ -185,6 +193,8 @@ export default function Home() {
 
       <button type="submit">Submit</button>
     </form>
+    <button type='button' onClick={ handleCron }>Cron</button>
+    <button type='button' onClick={ handleStopCron }>Stop try Cron</button>
     </>
   )
 }

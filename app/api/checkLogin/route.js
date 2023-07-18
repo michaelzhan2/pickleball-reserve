@@ -19,7 +19,7 @@ async function checkPage(page) {
 
 export async function POST(request) {
   const body = await request.json();
-  const { username, password, date, startTimeIdx, endTimeIdx } = body;
+  const { username, password } = body;
 
   const browser = await puppeteer.launch({
     headless: 'new'
