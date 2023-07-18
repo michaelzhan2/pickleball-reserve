@@ -124,32 +124,32 @@ export default function Home() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // let loginCheckResponse = await fetch('/api/checkLogin', {
-    //   method: 'POST',
-    //   headers: {
-    //     'Content-Type': 'application/json'
-    //   },
-    //   body: JSON.stringify(formData)
-    // });
-    // if (loginCheckResponse.status == 200) {
-    //   console.log('Login authorized');
-    // } else if (loginCheckResponse.status == 400) {
-    //   console.log('Incorrect username or password');
-    //   return;
-    // }
-    // let reservationResponse = await fetch('/api/puppeteer', {
-    //   method: 'POST',
-    //   headers: {
-    //     'Content-Type': 'application/json'
-    //   },
-    //   body: JSON.stringify(formData)
-    // });
-    // if (reservationResponse.status == 200) {
-    //   console.log('Puppeteer script ran successfully');
-    // } else if (reservationResponse.status == 400) {
-    //   console.log('Puppeteer script failed to run');
-    //   return;
-    // }
+    let loginCheckResponse = await fetch('/api/checkLogin', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(formData)
+    });
+    if (loginCheckResponse.status == 200) {
+      console.log('Login authorized');
+    } else if (loginCheckResponse.status == 400) {
+      console.log('Incorrect username or password');
+      return;
+    }
+    let reservationResponse = await fetch('/api/puppeteer', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(formData)
+    });
+    if (reservationResponse.status == 200) {
+      console.log('Puppeteer script ran successfully');
+    } else if (reservationResponse.status == 400) {
+      console.log('Puppeteer script failed to run');
+      return;
+    }
   }
 
 
