@@ -104,8 +104,7 @@ function dateToCron(date) {
   const reserveDate = new Date();
   reserveDate.setDate(targetDate.getDate() - 2);
   
-  return '0 10 16 19 6 *'
-  // return `5 0 6 ${reserveDate.getDate()} ${reserveDate.getMonth()} *`;
+  return `0 0 6 ${reserveDate.getDate()} ${reserveDate.getMonth()} *`;
 }
 
 
@@ -117,11 +116,14 @@ async function checkLogin (formData) {
     },
     body: JSON.stringify(formData)
   });
-  if (loginCheckResponse.status == 400) {
+  if (loginCheckResponse.status == 200) {
+    return true;
+  } else if (loginCheckResponse.status == 400) {
     alert('Invalid username or password');
   } else if (loginCheckResponse.status == 500) {
     alert('Internal server error');
-  }
+  } 
+  return false;
 }
 
 
@@ -173,7 +175,10 @@ export default function Home() {
       alert('You already have a reservation for this date');
       return;
     }
-    // await checkLogin(formData);
+    const loginCheckResult = await checkLogin(formData);
+    if (!loginCheckResult) {
+      return;
+    }
   
     const cronPattern = dateToCron(formData.date);
     const job = await startCron(formData, cronPattern);
