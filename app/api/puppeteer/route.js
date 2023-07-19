@@ -46,7 +46,7 @@ function generateTimeBlocks () {
   
   var time = 8;
 
-  while (time <= 22) {
+  while (time <= 21.5) {
     const hour = Math.floor(time);
     const minute = (time - hour) * 60;
 

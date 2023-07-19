@@ -2,7 +2,7 @@
 
 
 import styles from './page.module.css'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import * as Math from 'mathjs'
 import { startCron } from './utils/cron.js'
 
@@ -69,14 +69,13 @@ function generateDateOptions (curDate) {
   return [oneDayString, twoDaysString, threeDaysString];
 }
 
-
 function generateTimeOptions () {
   // Generate a list of time options in 30 minute intervals from 8:00 AM to 10:00 PM
   const timeOptions = [];
   
   var time = 8;
 
-  while (time <= 22) {
+  while (time <= 21.5) {
     const hour = Math.floor(time);
     const minute = (time - hour) * 60;
 
@@ -94,6 +93,42 @@ function generateTimeOptions () {
   }
 
   return timeOptions;
+}
+
+function dateToCron(date) {
+  const monthToNum = {
+    'January': 0,
+    'Febuary': 1,
+    'March': 2,
+    'April': 3,
+    'May': 4,
+    'June': 5,
+    'July': 6,
+    'August': 7,
+    'September': 8,
+    'October': 9,
+    'November': 10,
+    'December': 11
+  }
+
+  const dateList = date.split(' ');
+  const month = monthToNum[dateList[1]];
+  const day = parseInt(dateList[2].slice(0, -1));
+  const year = parseInt(dateList[3]);
+
+  // With month and day, create a variable that shows the day that came 2 days before
+  const targetDate = new Date();
+  targetDate.setMonth(month);
+  targetDate.setDate(day);
+  targetDate.setFullYear(year);
+  
+  const reserveDate = new Date();
+  reserveDate.setDate(targetDate.getDate() - 2);
+
+  const reserveMonth = reserveDate.getMonth();
+  const reserveDay = reserveDate.getDate();
+  
+  return `0 0 6 ${reserveDay} ${reserveMonth} *`;
 }
 
 
@@ -115,16 +150,23 @@ export default function Home() {
     endTimeIdxString: timeOptions.length - 1
   });
 
-  const handleChange = (e) => {
+  const [cronJob, setCronJob] = useState(null);
+
+  const [currentQueued, setCurrentQueued] = useState([]);
+  useEffect(() => {
+    fetch('/api/getData')
+      .then((response) => response.json())
+      .then((data) => setCurrentQueued(Object.keys(data)));
+  });
+
+
+  const handleFormChange = (e) => {
     const { id, value } = e.target;
     setFormData({ ...formData, [id]: value });
   }
 
-
-
-  const handleSubmit = async (e) => {
+  const handleFormSubmit = async (e) => {
     e.preventDefault();
-
     let loginCheckResponse = await fetch('/api/checkLogin', {
       method: 'POST',
       headers: {
@@ -138,64 +180,66 @@ export default function Home() {
       console.log('Incorrect username or password');
       return;
     }
-    let reservationResponse = await fetch('/api/puppeteer', {
+
+    cronPattern = dateToCron(formData.date);
+    setCronJob(await startCron(formData, cronPattern));
+  }
+
+  const handleUndo = () => {
+    if (cronJob) {
+      cronJob.stop();
+    }
+  }
+
+  const addToJSON = async () => {
+    await fetch('/api/saveData', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(formData)
+      body: JSON.stringify({ "id": "11111111" })
     });
-    if (reservationResponse.status == 200) {
-      console.log('Puppeteer script ran successfully');
-    } else if (reservationResponse.status == 400) {
-      console.log('Puppeteer script failed to run');
-      return;
-    }
   }
 
-  const handleCron = () => {
-    startCron();
-  }
-
-
-  const testFS = async () => {
-    let response = await fetch('/api/saveData');
-  }
 
   return (
     <>
-    <form onSubmit={ handleSubmit }>
-      <div className={styles['login-field']}>
-        <label htmlFor="username">Username</label>
-        <input id="username" type="text" placeholder="Username" onChange={ handleChange } required />
-        <label htmlFor="password">Password</label>
-        <input id="password" type="password" placeholder="Password" onChange={ handleChange } required/>
-      </div>
+      <form onSubmit={ handleFormSubmit }>
+        <div className={styles['login-field']}>
+          <label htmlFor="username">Username</label>
+          <input id="username" type="text" placeholder="Username" onChange={ handleFormChange } required />
+          <label htmlFor="password">Password</label>
+          <input id="password" type="password" placeholder="Password" onChange={ handleFormChange } required/>
+        </div>
 
-      <div className={ styles['date-field'] }>
-        <label htmlFor="date">Date</label>
-        <select id="date" defaultValue={ threeDaysString } onChange={ handleChange } required >
-          <option value={ threeDaysString }>{ threeDaysString }</option>
-          <option value={ twoDaysString }>{ twoDaysString }</option>
-          <option value={ oneDayString }>{ oneDayString }</option>
-        </select>
-      </div>
+        <div className={ styles['date-field'] }>
+          <label htmlFor="date">Date</label>
+          <select id="date" defaultValue={ threeDaysString } onChange={ handleFormChange } required >
+            <option value={ threeDaysString }>{ threeDaysString }</option>
+            <option value={ twoDaysString }>{ twoDaysString }</option>
+            <option value={ oneDayString }>{ oneDayString }</option>
+          </select>
+        </div>
 
-      <div className={ styles['time-field'] }>
-        <label htmlFor="startTimeIdxString">Start Time</label>
-        <select id="startTimeIdxString" defaultValue={ 22 } onChange={ handleChange } required >
-          { timeOptions.map((time, idx) => <option value={ idx } key={ idx }>{ time }</option>) }
-        </select>
-        <label htmlFor="endTimeIdxString">End Time</label>
-        <select id="endTimeIdxString" defaultValue={ timeOptions.length - 1 } onChange={ handleChange } required >
-          { timeOptions.map((time, idx) => <option value={ idx } key={ idx }>{ time }</option>) }
-        </select>
-      </div>
+        <div className={ styles['time-field'] }>
+          <label htmlFor="startTimeIdxString">Start Time</label>
+          <select id="startTimeIdxString" defaultValue={ 23 } onChange={ handleFormChange } required >
+            { timeOptions.map((time, idx) => <option value={ idx } key={ idx }>{ time }</option>) }
+          </select>
+          <label htmlFor="endTimeIdxString">End Time</label>
+          <select id="endTimeIdxString" defaultValue={ timeOptions.length - 1 } onChange={ handleFormChange } required >
+            { timeOptions.map((time, idx) => <option value={ idx } key={ idx }>{ time }</option>) }
+          </select>
+        </div>
 
-      <button type="submit">Submit</button>
-    </form>
-    <button type='button' onClick={ handleCron }>Cron</button>
-    <button type='button' onClick={ testFS }>Test FS</button>
+        <button type="submit">Submit</button>
+        <button type="button" onClick={ handleUndo }>Undo</button>
+        <button type='button' onClick={ addToJSON }>Add to JSON</button>
+      </form>
+      <div className={ styles['current-jobs'] }>
+        <h2>Current Jobs</h2>
+        { currentQueued.map((job) => <p>{ job }</p>) }
+      </div>
     </>
   )
 }

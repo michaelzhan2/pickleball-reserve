@@ -1,15 +1,20 @@
 const { CronJob } = require('cron');
 
 
-function scheduledFunction() {
-  console.log("Running Cron Job");
-  scheduledFunction.job.stop();
+async function scheduleForm(formData) {
+  await fetch('/api/puppeteer', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(formData)
+  });
+  scheduleForm.job.stop();
 }
 
 
-
-export async function startCron() {
-  scheduledFunction.job = new CronJob('*/5 * * * * *', scheduledFunction);
-  scheduledFunction.job.start();
-  return scheduledFunction.job;
+export async function startCron(formData, cronPattern) {
+  const wrapper = async () => {await scheduleForm(formData)};
+  scheduleForm.job = new CronJob(cronPattern, wrapper, null, true, 'America/Chicago');
+  return scheduleForm.job;
 }
