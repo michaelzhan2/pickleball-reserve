@@ -13,14 +13,6 @@ function generateDateOptions (curDate) {
   * @param {Date} curDate - The current date
   * @return {Array} - An array of two strings representing the date options
   */
-  const oneDay = new Date();
-  const twoDays = new Date();
-  const threeDays = new Date();
-
-  oneDay.setDate(curDate.getDate() + 1);
-  twoDays.setDate(curDate.getDate() + 2);
-  threeDays.setDate(curDate.getDate() + 3);
-
   const dayOfWeek = {
     0: 'Sunday',
     1: 'Monday',
@@ -46,27 +38,14 @@ function generateDateOptions (curDate) {
     11: 'December'
   }
 
-  const oneDayDay = dayOfWeek[oneDay.getDay()];
-  const twoDaysDay = dayOfWeek[twoDays.getDay()];
-  const threeDaysDay = dayOfWeek[threeDays.getDay()];
-
-  const oneDayMonth = monthOfYear[oneDay.getMonth()];
-  const twoDaysMonth = monthOfYear[twoDays.getMonth()];
-  const threeDaysMonth = monthOfYear[threeDays.getMonth()];
-
-  const oneDayDate = oneDay.getDate();
-  const twoDaysDate = twoDays.getDate();
-  const threeDaysDate = threeDays.getDate();
-
-  const oneDayYear = oneDay.getFullYear();
-  const twoDaysYear = twoDays.getFullYear();
-  const threeDaysYear = threeDays.getFullYear();
-
-  const oneDayString = `${oneDayDay}, ${oneDayMonth} ${oneDayDate}, ${oneDayYear}`;
-  const twoDaysString = `${twoDaysDay}, ${twoDaysMonth} ${twoDaysDate}, ${twoDaysYear}`;
-  const threeDaysString = `${threeDaysDay}, ${threeDaysMonth} ${threeDaysDate}, ${threeDaysYear}`;
-
-  return [oneDayString, twoDaysString, threeDaysString];
+  const dayStrings = [];
+  for (var i = 1; i <= 7; i++) {
+    const day = new Date();
+    day.setDate(curDate.getDate() + i);
+    const dayString = `${dayOfWeek[day.getDay()]}, ${monthOfYear[day.getMonth()]} ${day.getDate()}, ${day.getFullYear()}`;
+    dayStrings.push(dayString);
+  }
+  return dayStrings;
 }
 
 function generateTimeOptions () {
@@ -132,26 +111,38 @@ function dateToCron(date) {
 }
 
 
+async function checkLogin (formData) {
+  let loginCheckResponse = await fetch('/api/checkLogin', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(formData)
+  });
+  if (loginCheckResponse.status == 400) {
+    alert('Invalid username or password');
+  } else if (loginCheckResponse.status == 500) {
+    alert('Internal server error');
+  }
+}
+
+
 export default function Home() {
   /*
   * The main page component
   * @return {JSX} - The main page component
   */
-  const curDate = new Date();
-  const [oneDayString, twoDaysString, threeDaysString] = generateDateOptions(curDate);
-
+  const dates = generateDateOptions(new Date());
   const timeOptions = generateTimeOptions();
 
   const [formData, setFormData] = useState({
     username: '',
     password: '',
-    date: threeDaysString,
+    date: dates[2],
     startTimeIdxString: 22,
     endTimeIdxString: timeOptions.length - 1
   });
-
   const [cronJob, setCronJob] = useState(null);
-
   const [currentQueued, setCurrentQueued] = useState([]);
   useEffect(() => {
     fetch('/api/getData')
@@ -159,7 +150,9 @@ export default function Home() {
       .then((data) => setCurrentQueued(Object.keys(data)));
   });
 
+  const activeJobs = {};
 
+  // event handlers
   const handleFormChange = (e) => {
     const { id, value } = e.target;
     setFormData({ ...formData, [id]: value });
@@ -167,38 +160,16 @@ export default function Home() {
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
-    let loginCheckResponse = await fetch('/api/checkLogin', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(formData)
-    });
-    if (loginCheckResponse.status == 200) {
-      console.log('Login authorized');
-    } else if (loginCheckResponse.status == 400) {
-      console.log('Incorrect username or password');
+    if (currentQueued.includes(formData.date)) {
+      alert('You already have a reservation for this date');
       return;
     }
-
-    cronPattern = dateToCron(formData.date);
-    setCronJob(await startCron(formData, cronPattern));
-  }
-
-  const handleUndo = () => {
-    if (cronJob) {
-      cronJob.stop();
-    }
-  }
-
-  const addToJSON = async () => {
-    await fetch('/api/saveData', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ "id": "11111111" })
-    });
+    await checkLogin(formData);
+  
+    const cronPattern = dateToCron(formData.date);
+    console.log(cronPattern)
+    const job = await startCron(formData, cronPattern);
+    activeJobs[formData.date] = job;
   }
 
 
@@ -214,10 +185,8 @@ export default function Home() {
 
         <div className={ styles['date-field'] }>
           <label htmlFor="date">Date</label>
-          <select id="date" defaultValue={ threeDaysString } onChange={ handleFormChange } required >
-            <option value={ threeDaysString }>{ threeDaysString }</option>
-            <option value={ twoDaysString }>{ twoDaysString }</option>
-            <option value={ oneDayString }>{ oneDayString }</option>
+          <select id="date" defaultValue={ dates[2] } onChange={ handleFormChange } required >
+            { dates.map((date, idx) => <option value={ date } key={ idx }>{ date }</option>) }
           </select>
         </div>
 
@@ -233,12 +202,16 @@ export default function Home() {
         </div>
 
         <button type="submit">Submit</button>
-        <button type="button" onClick={ handleUndo }>Undo</button>
-        <button type='button' onClick={ addToJSON }>Add to JSON</button>
       </form>
       <div className={ styles['current-jobs'] }>
         <h2>Current Jobs</h2>
-        { currentQueued.map((job) => <p>{ job }</p>) }
+        { currentQueued.map((job, idx) => (
+            <div key={ idx }>
+              <p>{ job }</p>
+              { activeJobs[job] && <button type="button" onClick={ () => activeJobs[job].stop() }>Stop</button> }
+            </div>
+          )
+        )}
       </div>
     </>
   )
