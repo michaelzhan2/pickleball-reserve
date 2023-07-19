@@ -103,11 +103,9 @@ function dateToCron(date) {
   
   const reserveDate = new Date();
   reserveDate.setDate(targetDate.getDate() - 2);
-
-  const reserveMonth = reserveDate.getMonth();
-  const reserveDay = reserveDate.getDate();
   
-  return `0 30 12 ${reserveDay} ${reserveMonth} *`;
+  return '0 10 16 19 6 *'
+  // return `5 0 6 ${reserveDate.getDate()} ${reserveDate.getMonth()} *`;
 }
 
 
@@ -124,6 +122,18 @@ async function checkLogin (formData) {
   } else if (loginCheckResponse.status == 500) {
     alert('Internal server error');
   }
+}
+
+
+async function removeJobFromJSON (job) {
+  const data = { 'id': job };
+  await fetch('/api/deleteData', {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(data)
+  });
 }
 
 
@@ -163,14 +173,12 @@ export default function Home() {
       alert('You already have a reservation for this date');
       return;
     }
-    await checkLogin(formData);
+    // await checkLogin(formData);
   
     const cronPattern = dateToCron(formData.date);
-    console.log(cronPattern)
     const job = await startCron(formData, cronPattern);
     setActiveJobs({ ...activeJobs, [formData.date]: job });
   }
-
 
   return (
     <>
@@ -207,7 +215,13 @@ export default function Home() {
         { currentQueued.map((job, idx) => (
             <div key={ idx }>
               <span>{ job }</span>
-              { activeJobs[job] && <button type="button" onClick={ () => activeJobs[job].stop() }>Stop</button> }
+              { activeJobs[job] && <button type="button" onClick={ () => {
+                  activeJobs[job].stop();
+                  delete activeJobs[job];
+                  setActiveJobs({ ...activeJobs });
+                  removeJobFromJSON(job);
+                  alert(`Job stopped (${job})`);
+              }}>Stop</button> }
             </div>
           )
         )}

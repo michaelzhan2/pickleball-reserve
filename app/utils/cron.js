@@ -10,6 +10,14 @@ async function scheduleForm(formData) {
     body: JSON.stringify(formData)
   });
   scheduleForm.job.stop();
+  const data = { 'id': formData.date};
+  await fetch('/api/deleteData', {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(data)
+  });
 }
 
 
@@ -23,7 +31,6 @@ async function addData(formData) {
     body: JSON.stringify(data)
   });
 }
-
 
 export async function startCron(formData, cronPattern) {
   const wrapper = async () => {await scheduleForm(formData)};
