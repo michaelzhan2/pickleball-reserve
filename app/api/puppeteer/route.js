@@ -1,4 +1,6 @@
 const puppeteer = require('puppeteer');
+const chromium = require('chromium');
+
 
 async function checkPage(page) {
   for (let count = 0; count < 10; count++) {
@@ -85,8 +87,11 @@ export async function POST(request) {
   var responseBody;
   var responseStatus;
 
+  const executablePath = await chromium.executablePath;
+
   const browser = await puppeteer.launch({
-    headless: false
+    headless: 'new',
+    executablePath: executablePath
   });
 
   try {
