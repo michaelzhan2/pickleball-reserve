@@ -160,7 +160,7 @@ export default function Home() {
     fetch('/api/getData')
       .then((response) => response.json())
       .then((data) => setCurrentQueued(Object.keys(data)));
-  }, []);
+  }, [activeJobs]);
   const[activeJobs, setActiveJobs] = useState({});
 
 
