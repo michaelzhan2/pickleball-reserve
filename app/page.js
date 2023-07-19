@@ -5,7 +5,6 @@ import styles from './page.module.css'
 import { useState } from 'react'
 import * as Math from 'mathjs'
 import { startCron } from './utils/cron.js'
-import { saveJSON } from './utils/saveJSON.js'
 
 
 function generateDateOptions (curDate) {
@@ -160,8 +159,8 @@ export default function Home() {
   }
 
 
-  const testFS = () => {
-    saveJSON();
+  const testFS = async () => {
+    let response = await fetch('/api/saveData');
   }
 
   return (
@@ -202,7 +201,7 @@ export default function Home() {
       <button type="submit">Submit</button>
     </form>
     <button type='button' onClick={ handleCron }>Cron</button>
-    <button type='button' onclick={ testFS }>Test FS</button>
+    <button type='button' onClick={ testFS }>Test FS</button>
     </>
   )
 }
