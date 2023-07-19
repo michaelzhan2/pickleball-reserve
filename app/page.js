@@ -39,7 +39,7 @@ function generateDateOptions (curDate) {
   }
 
   const dayStrings = [];
-  for (var i = 1; i <= 7; i++) {
+  for (var i = 2; i <= 9; i++) {
     const day = new Date();
     day.setDate(curDate.getDate() + i);
     const dayString = `${dayOfWeek[day.getDay()]}, ${monthOfYear[day.getMonth()]} ${day.getDate()}, ${day.getFullYear()}`;
@@ -107,7 +107,7 @@ function dateToCron(date) {
   const reserveMonth = reserveDate.getMonth();
   const reserveDay = reserveDate.getDate();
   
-  return `0 0 6 ${reserveDay} ${reserveMonth} *`;
+  return `0 30 12 ${reserveDay} ${reserveMonth} *`;
 }
 
 
@@ -138,19 +138,18 @@ export default function Home() {
   const [formData, setFormData] = useState({
     username: '',
     password: '',
-    date: dates[2],
-    startTimeIdxString: 22,
+    date: dates[0],
+    startTimeIdxString: 23,
     endTimeIdxString: timeOptions.length - 1
   });
-  const [cronJob, setCronJob] = useState(null);
   const [currentQueued, setCurrentQueued] = useState([]);
   useEffect(() => {
     fetch('/api/getData')
       .then((response) => response.json())
       .then((data) => setCurrentQueued(Object.keys(data)));
   });
+  const[activeJobs, setActiveJobs] = useState({});
 
-  const activeJobs = {};
 
   // event handlers
   const handleFormChange = (e) => {
@@ -169,7 +168,7 @@ export default function Home() {
     const cronPattern = dateToCron(formData.date);
     console.log(cronPattern)
     const job = await startCron(formData, cronPattern);
-    activeJobs[formData.date] = job;
+    setActiveJobs({ ...activeJobs, [formData.date]: job });
   }
 
 
@@ -185,7 +184,7 @@ export default function Home() {
 
         <div className={ styles['date-field'] }>
           <label htmlFor="date">Date</label>
-          <select id="date" defaultValue={ dates[2] } onChange={ handleFormChange } required >
+          <select id="date" defaultValue={ dates[0] } onChange={ handleFormChange } required >
             { dates.map((date, idx) => <option value={ date } key={ idx }>{ date }</option>) }
           </select>
         </div>
@@ -207,7 +206,7 @@ export default function Home() {
         <h2>Current Jobs</h2>
         { currentQueued.map((job, idx) => (
             <div key={ idx }>
-              <p>{ job }</p>
+              <span>{ job }</span>
               { activeJobs[job] && <button type="button" onClick={ () => activeJobs[job].stop() }>Stop</button> }
             </div>
           )
