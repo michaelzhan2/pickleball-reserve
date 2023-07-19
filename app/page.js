@@ -109,6 +109,7 @@ function dateToCron(date) {
 
 
 async function checkLogin (formData) {
+  console.log('Starting login check')
   let loginCheckResponse = await fetch('/api/checkLogin', {
     method: 'POST',
     headers: {
