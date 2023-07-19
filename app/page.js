@@ -110,7 +110,6 @@ export default function Home() {
   const [formData, setFormData] = useState({
     username: '',
     password: '',
-    email: '',
     date: threeDaysString,
     startTimeIdxString: 22,
     endTimeIdxString: timeOptions.length - 1
@@ -173,11 +172,6 @@ export default function Home() {
         <input id="password" type="password" placeholder="Password" onChange={ handleChange } required/>
       </div>
 
-      <div className={ styles['email-field'] }>
-        <label htmlFor="email">Email</label>
-        <input id="email" type="email" placeholder="Email" onChange={ handleChange } required/>
-      </div>
- 
       <div className={ styles['date-field'] }>
         <label htmlFor="date">Date</label>
         <select id="date" defaultValue={ threeDaysString } onChange={ handleChange } required >
