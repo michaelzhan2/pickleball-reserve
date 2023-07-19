@@ -4,7 +4,8 @@
 import styles from './page.module.css'
 import { useState } from 'react'
 import * as Math from 'mathjs'
-import { startCron, stopCron } from './utils/cron.js'
+import { startCron } from './utils/cron.js'
+import { saveJSON } from './utils/saveJSON.js'
 
 
 function generateDateOptions (curDate) {
@@ -110,6 +111,7 @@ export default function Home() {
   const [formData, setFormData] = useState({
     username: '',
     password: '',
+    email: '',
     date: threeDaysString,
     startTimeIdxString: 22,
     endTimeIdxString: timeOptions.length - 1
@@ -157,6 +159,11 @@ export default function Home() {
     startCron();
   }
 
+
+  const testFS = () => {
+    saveJSON();
+  }
+
   return (
     <>
     <form onSubmit={ handleSubmit }>
@@ -165,6 +172,11 @@ export default function Home() {
         <input id="username" type="text" placeholder="Username" onChange={ handleChange } required />
         <label htmlFor="password">Password</label>
         <input id="password" type="password" placeholder="Password" onChange={ handleChange } required/>
+      </div>
+
+      <div className={ styles['email-field'] }>
+        <label htmlFor="email">Email</label>
+        <input id="email" type="email" placeholder="Email" onChange={ handleChange } required/>
       </div>
  
       <div className={ styles['date-field'] }>
@@ -190,6 +202,7 @@ export default function Home() {
       <button type="submit">Submit</button>
     </form>
     <button type='button' onClick={ handleCron }>Cron</button>
+    <button type='button' onclick={ testFS }>Test FS</button>
     </>
   )
 }

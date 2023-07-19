@@ -86,7 +86,7 @@ export async function POST(request) {
   var responseStatus;
 
   const browser = await puppeteer.launch({
-    headless: 'new'
+    headless: false
   });
 
   try {
@@ -164,7 +164,6 @@ export async function POST(request) {
           if (!validTimes) {
             continue;
           }
-          console.log(timeIdx, timeIdx + window - 1, courtNum - 11)
           // select the time block
           for (var i = timeIdx; i < timeIdx + window; i++) {
             const time = await court.waitForSelector(`::-p-text(${timeBlocks[i]})`);
