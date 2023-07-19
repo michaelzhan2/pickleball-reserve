@@ -156,12 +156,13 @@ export default function Home() {
     endTimeIdxString: timeOptions.length - 1
   });
   const [currentQueued, setCurrentQueued] = useState([]);
+  const[activeJobs, setActiveJobs] = useState({});
   useEffect(() => {
     fetch('/api/getData')
       .then((response) => response.json())
       .then((data) => setCurrentQueued(Object.keys(data)));
   }, [activeJobs]);
-  const[activeJobs, setActiveJobs] = useState({});
+  
 
 
   // event handlers
