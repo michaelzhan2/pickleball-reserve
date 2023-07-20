@@ -146,6 +146,7 @@ export default function Home() {
   const dates = generateDateOptions(new Date());
   const timeOptions = generateTimeOptions();
 
+  const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
     username: '',
     password: '',
@@ -155,10 +156,15 @@ export default function Home() {
   });
   const [currentQueued, setCurrentQueued] = useState([]);
   const[activeJobs, setActiveJobs] = useState({});
-  useEffect(async () => {
-    await fetch('/api/getData')
-      .then((response) => response.json())
-      .then((data) => setCurrentQueued(data));
+  useEffect(() => {
+    setLoading(true);
+    async function fetchData() {
+      await fetch('/api/getData')
+        .then((response) => response.json())
+        .then((data) => setCurrentQueued(data));
+    }
+    fetchData();
+    setLoading(false);
   }, [activeJobs]);
   
 
@@ -175,6 +181,7 @@ export default function Home() {
       alert('You already have a reservation for this date');
       return;
     }
+    setLoading(true);
     const loginCheckResult = await checkLogin(formData);
     if (!loginCheckResult) {
       return;
@@ -183,54 +190,63 @@ export default function Home() {
     const cronPattern = dateToCron(formData.date);
     const job = await startCron(formData, cronPattern);
     setActiveJobs({ ...activeJobs, [formData.date]: job });
+    setLoading(false);
   }
 
   return (
     <>
-      <form onSubmit={ handleFormSubmit }>
-        <div className={styles['login-field']}>
-          <label htmlFor="username">Username</label>
-          <input id="username" type="text" placeholder="Username" onChange={ handleFormChange } required />
-          <label htmlFor="password">Password</label>
-          <input id="password" type="password" placeholder="Password" onChange={ handleFormChange } required/>
+      { loading ? (
+        <div className={ styles['loading'] }>
+          <h1>Loading...</h1>
         </div>
+      ) : (
+        <>
+          <form onSubmit={ handleFormSubmit }>
+          <div className={styles['login-field']}>
+            <label htmlFor="username">Username</label>
+            <input id="username" type="text" placeholder="Username" onChange={ handleFormChange } required />
+            <label htmlFor="password">Password</label>
+            <input id="password" type="password" placeholder="Password" onChange={ handleFormChange } required/>
+          </div>
 
-        <div className={ styles['date-field'] }>
-          <label htmlFor="date">Date</label>
-          <select id="date" defaultValue={ dates[0] } onChange={ handleFormChange } required >
-            { dates.map((date, idx) => <option value={ date } key={ idx }>{ date }</option>) }
-          </select>
-        </div>
+          <div className={ styles['date-field'] }>
+            <label htmlFor="date">Date</label>
+            <select id="date" defaultValue={ dates[0] } onChange={ handleFormChange } required >
+              { dates.map((date, idx) => <option value={ date } key={ idx }>{ date }</option>) }
+            </select>
+          </div>
 
-        <div className={ styles['time-field'] }>
-          <label htmlFor="startTimeIdxString">Start Time</label>
-          <select id="startTimeIdxString" defaultValue={ 23 } onChange={ handleFormChange } required >
-            { timeOptions.map((time, idx) => <option value={ idx } key={ idx }>{ time }</option>) }
-          </select>
-          <label htmlFor="endTimeIdxString">End Time</label>
-          <select id="endTimeIdxString" defaultValue={ timeOptions.length - 1 } onChange={ handleFormChange } required >
-            { timeOptions.map((time, idx) => <option value={ idx } key={ idx }>{ time }</option>) }
-          </select>
-        </div>
+          <div className={ styles['time-field'] }>
+            <label htmlFor="startTimeIdxString">Start Time</label>
+            <select id="startTimeIdxString" defaultValue={ 23 } onChange={ handleFormChange } required >
+              { timeOptions.map((time, idx) => <option value={ idx } key={ idx }>{ time }</option>) }
+            </select>
+            <label htmlFor="endTimeIdxString">End Time</label>
+            <select id="endTimeIdxString" defaultValue={ timeOptions.length - 1 } onChange={ handleFormChange } required >
+              { timeOptions.map((time, idx) => <option value={ idx } key={ idx }>{ time }</option>) }
+            </select>
+          </div>
 
-        <button type="submit">Submit</button>
-      </form>
-      <div className={ styles['current-jobs'] }>
-        <h2>Current Jobs</h2>
-        { currentQueued.map((job, idx) => (
-            <div key={ idx }>
-              <span>{ job }</span>
-              { activeJobs[job] && <button type="button" onClick={ () => {
-                  activeJobs[job].stop();
-                  delete activeJobs[job];
-                  setActiveJobs({ ...activeJobs });
-                  removeJobFromJSON(job);
-                  alert(`Job stopped (${job})`);
-              }}>Stop</button> }
-            </div>
-          )
-        )}
-      </div>
+          <button type="submit">Submit</button>
+          </form>
+          <div className={ styles['current-jobs'] }>
+            <h2>Current Jobs</h2>
+            { currentQueued.map((job, idx) => (
+                <div key={ idx }>
+                  <span>{ job }</span>
+                  { activeJobs[job] && <button type="button" onClick={ () => {
+                      activeJobs[job].stop();
+                      delete activeJobs[job];
+                      setActiveJobs({ ...activeJobs });
+                      removeJobFromJSON(job);
+                      alert(`Job stopped (${job})`);
+                  }}>Stop</button> }
+                </div>
+              )
+            )}
+          </div>
+        </>
+      )}
     </>
   )
 }
