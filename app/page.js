@@ -159,7 +159,7 @@ export default function Home() {
   useEffect(() => {
     fetch('/api/getData')
       .then((response) => response.json())
-      .then((data) => setCurrentQueued(Object.keys(data)));
+      .then((data) => setCurrentQueued(data));
   }, [activeJobs]);
   
 

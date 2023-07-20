@@ -1,4 +1,4 @@
-const fs = require('fs');
+import { deleteFromRedis } from "app/utils/redisClient";
 
 
 export async function DELETE(request) {

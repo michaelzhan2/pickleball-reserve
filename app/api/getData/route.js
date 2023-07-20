@@ -1,10 +1,10 @@
-const fs = require('fs');
+import { getJobs } from 'app/utils/redisClient.js';
 
 
 export async function GET() {
-  const data = fs.readFileSync('./app/data/data.json', 'utf8');
-  const all_keys = JSON.parse(data);
-  return new Response(JSON.stringify(all_keys), {
+  const jobs = await getJobs();
+  console.log(jobs);
+  return new Response(JSON.stringify(jobs), {
     headers: {
       'content-type': 'application/json;charset=UTF-8',
     },
