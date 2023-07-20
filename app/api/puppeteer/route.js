@@ -87,7 +87,8 @@ export async function POST(request) {
   var responseStatus;
 
   const browser = await puppeteer.launch({
-    headless: 'new'
+    headless: 'new',
+    args: ['--no-sandbox', '--disable-setuid-sandbox']
   });
 
   try {

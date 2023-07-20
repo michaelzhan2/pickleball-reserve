@@ -22,7 +22,8 @@ export async function POST(request) {
   const { username, password } = body;
 
   const browser = await puppeteer.launch({
-    headless: 'new'
+    headless: 'new',
+    args: ['--no-sandbox', '--disable-setuid-sandbox']
   });
 
   var responseBody;
