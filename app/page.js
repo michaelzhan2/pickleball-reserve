@@ -162,9 +162,9 @@ export default function Home() {
       await fetch('/api/getData')
         .then((response) => response.json())
         .then((data) => setCurrentQueued(data));
+      setLoading(false);
     }
     fetchData();
-    setLoading(false);
   }, [activeJobs]);
   
 
@@ -198,6 +198,7 @@ export default function Home() {
 
   return (
     <>
+
       { loading ? (
         <div className={ styles['loading'] }>
           <h1>Loading...</h1>
@@ -205,32 +206,32 @@ export default function Home() {
       ) : (
         <>
           <form onSubmit={ handleFormSubmit }>
-          <div className={styles['login-field']}>
-            <label htmlFor="username">Username</label>
-            <input id="username" type="text" placeholder="Username" onChange={ handleFormChange } required />
-            <label htmlFor="password">Password</label>
-            <input id="password" type="password" placeholder="Password" onChange={ handleFormChange } required/>
-          </div>
+            <div className={styles['login-field']}>
+              <label htmlFor="username">Username</label>
+              <input id="username" type="text" placeholder="Username" onChange={ handleFormChange } required />
+              <label htmlFor="password">Password</label>
+              <input id="password" type="password" placeholder="Password" onChange={ handleFormChange } required/>
+            </div>
 
-          <div className={ styles['date-field'] }>
-            <label htmlFor="date">Date</label>
-            <select id="date" defaultValue={ dates[0] } onChange={ handleFormChange } required >
-              { dates.map((date, idx) => <option value={ date } key={ idx }>{ date }</option>) }
-            </select>
-          </div>
+            <div className={ styles['date-field'] }>
+              <label htmlFor="date">Date</label>
+              <select id="date" defaultValue={ dates[0] } onChange={ handleFormChange } required >
+                { dates.map((date, idx) => <option value={ date } key={ idx }>{ date }</option>) }
+              </select>
+            </div>
 
-          <div className={ styles['time-field'] }>
-            <label htmlFor="startTimeIdxString">Start Time</label>
-            <select id="startTimeIdxString" defaultValue={ 23 } onChange={ handleFormChange } required >
-              { timeOptions.map((time, idx) => <option value={ idx } key={ idx }>{ time }</option>) }
-            </select>
-            <label htmlFor="endTimeIdxString">End Time</label>
-            <select id="endTimeIdxString" defaultValue={ timeOptions.length - 1 } onChange={ handleFormChange } required >
-              { timeOptions.map((time, idx) => <option value={ idx } key={ idx }>{ time }</option>) }
-            </select>
-          </div>
+            <div className={ styles['time-field'] }>
+              <label htmlFor="startTimeIdxString">Start Time</label>
+              <select id="startTimeIdxString" defaultValue={ 23 } onChange={ handleFormChange } required >
+                { timeOptions.map((time, idx) => <option value={ idx } key={ idx }>{ time }</option>) }
+              </select>
+              <label htmlFor="endTimeIdxString">End Time</label>
+              <select id="endTimeIdxString" defaultValue={ timeOptions.length - 1 } onChange={ handleFormChange } required >
+                { timeOptions.map((time, idx) => <option value={ idx } key={ idx }>{ time }</option>) }
+              </select>
+            </div>
 
-          <button type="submit">Submit</button>
+            <button type="submit">Submit</button>
           </form>
           <div className={ styles['current-jobs'] }>
             <h2>Current Jobs</h2>
@@ -250,6 +251,7 @@ export default function Home() {
           </div>
         </>
       )}
+      
     </>
   )
 }
