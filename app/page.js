@@ -142,14 +142,15 @@ async function removeJobFromJSON (job) {
 
 
 async function getData () {
+  console.log('getting data');
   const data = await fetch(BASEURL + '/api/readData', {
-    method: 'GET',
+    method: 'POST',
     headers: {
       'Content-Type': 'application/json'
       }
     }
   );
-  console.log('got data')
+  console.log('got data');
   const dataJSON = await data.json();
   return dataJSON.jobs;
 }
