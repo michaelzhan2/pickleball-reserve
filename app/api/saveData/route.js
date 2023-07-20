@@ -2,8 +2,8 @@ import { addJob } from 'app/utils/redisClient.js';
 
 
 export async function POST(request) {
-  const data = await request.json();
-  const job = data.body;
+  const job = await request.json();
+  console.log(job);
   await addJob(job);
   return new Response();
 }

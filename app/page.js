@@ -131,9 +131,9 @@ async function removeJobFromJSON (job) {
   await fetch('/api/deleteData', {
     method: 'DELETE',
     headers: {
-      'Content-Type': 'text/plain'
+      'Content-Type': 'application/json'
     },
-    body: job
+    body: JSON.stringify(job)
   });
 }
 

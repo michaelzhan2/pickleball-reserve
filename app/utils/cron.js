@@ -13,9 +13,9 @@ async function scheduleForm(formData) {
   await fetch('/api/deleteData', {
     method: 'DELETE',
     headers: {
-      'Content-Type': 'text/plain'
+      'Content-Type': 'application/json'
     },
-    body: formData.date
+    body: JSON.stringify(formData.date)
   });
 }
 
@@ -24,9 +24,9 @@ async function addData(formData) {
   await fetch('/api/saveData', {
     method: 'POST',
     headers: {
-      'Content-Type': 'text/plain'
+      'Content-Type': 'application/json'
     },
-    body: formData.date
+    body: JSON.stringify(formData.date)
   });
 }
 
