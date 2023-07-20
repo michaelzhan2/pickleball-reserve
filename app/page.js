@@ -164,20 +164,13 @@ export default function Home() {
   const [currentQueued, setCurrentQueued] = useState([]);
   const [activeJobs, setActiveJobs] = useState({});
 
-  
-
-
-
-  useEffect(() => {
-    async function fetchData() {
-      const data = await getData();
+  if (currentQueued.length == 0) {
+    // load data from redis
+    getData().then(data => {
       setCurrentQueued(data);
       setLoading(false);
-    }
-    fetchData();
-  }, []);
-  
-
+    });
+  } 
 
   // event handlers
   const handleFormChange = (e) => {
@@ -204,7 +197,6 @@ export default function Home() {
     console.log(formData.date)
     setActiveJobs({ ...activeJobs, [formData.date]: job });
     setCurrentQueued([...currentQueued, formData.date]);
-    await new Promise(resolve => setTimeout(resolve, 1000));
     setLoading(false);
   }
 
