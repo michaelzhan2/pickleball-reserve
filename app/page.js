@@ -39,7 +39,7 @@ function generateDateOptions (curDate) {
   }
 
   const dayStrings = [];
-  for (var i = 2; i <= 9; i++) {
+  for (var i = 3; i <= 9; i++) {
     const day = new Date();
     day.setDate(curDate.getDate() + i);
     const dayString = `${dayOfWeek[day.getDay()]}, ${monthOfYear[day.getMonth()]} ${day.getDate()}, ${day.getFullYear()}`;
