@@ -10,25 +10,23 @@ async function scheduleForm(formData) {
     body: JSON.stringify(formData)
   });
   scheduleForm.job.stop();
-  const data = { 'id': formData.date};
   await fetch('/api/deleteData', {
     method: 'DELETE',
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'text/plain'
     },
-    body: JSON.stringify(data)
+    body: formData.date
   });
 }
 
 
 async function addData(formData) {
-  const data = { 'id': formData.date};
   await fetch('/api/saveData', {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'text/plain'
     },
-    body: JSON.stringify(data)
+    body: formData.date
   });
 }
 

@@ -128,13 +128,12 @@ async function checkLogin (formData) {
 
 
 async function removeJobFromJSON (job) {
-  const data = { 'id': job };
   await fetch('/api/deleteData', {
     method: 'DELETE',
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'text/plain'
     },
-    body: JSON.stringify(data)
+    body: job
   });
 }
 
