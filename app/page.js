@@ -138,6 +138,13 @@ async function removeJobFromJSON (job) {
 }
 
 
+async function getData () {
+  const data = await fetch('/api/getData');
+  const dataJSON = await data.json();
+  return dataJSON;
+}
+
+
 export default function Home() {
   /*
   * The main page component
@@ -155,17 +162,20 @@ export default function Home() {
     endTimeIdxString: timeOptions.length - 1
   });
   const [currentQueued, setCurrentQueued] = useState([]);
-  const[activeJobs, setActiveJobs] = useState({});
+  const [activeJobs, setActiveJobs] = useState({});
+
+  
+
+
+
   useEffect(() => {
-    setLoading(true);
     async function fetchData() {
-      await fetch('/api/getData')
-        .then((response) => response.json())
-        .then((data) => setCurrentQueued(data));
+      const data = await getData();
+      setCurrentQueued(data);
       setLoading(false);
     }
     fetchData();
-  }, [activeJobs]);
+  }, []);
   
 
 
@@ -189,10 +199,12 @@ export default function Home() {
   
     const cronPattern = dateToCron(formData.date);
     const job = await startCron(formData, cronPattern);
+    console.log(2323);
     console.log(job);
     console.log(formData.date)
     setActiveJobs({ ...activeJobs, [formData.date]: job });
-    console.log(activeJobs);
+    setCurrentQueued([...currentQueued, formData.date]);
+    await new Promise(resolve => setTimeout(resolve, 1000));
     setLoading(false);
   }
 

@@ -2,6 +2,7 @@ const { CronJob } = require('cron');
 
 
 async function scheduleForm(formData) {
+  console.log('executing scheduleForm')
   await fetch('/api/puppeteer', {
     method: 'POST',
     headers: {
