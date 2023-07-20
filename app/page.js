@@ -189,7 +189,10 @@ export default function Home() {
   
     const cronPattern = dateToCron(formData.date);
     const job = await startCron(formData, cronPattern);
+    console.log(job);
+    console.log(formData.date)
     setActiveJobs({ ...activeJobs, [formData.date]: job });
+    console.log(activeJobs);
     setLoading(false);
   }
 
