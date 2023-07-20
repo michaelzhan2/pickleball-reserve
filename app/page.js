@@ -108,6 +108,9 @@ function dateToCron(date) {
 }
 
 
+var loaded = false;
+
+
 async function checkLogin (formData) {
   let loginCheckResponse = await fetch('/api/checkLogin', {
     method: 'POST',
@@ -164,12 +167,13 @@ export default function Home() {
   const [currentQueued, setCurrentQueued] = useState([]);
   const [activeJobs, setActiveJobs] = useState({});
 
-  if (currentQueued.length == 0) {
+  if (currentQueued.length == 0 && !loaded) {
     // load data from redis
     getData().then(data => {
       setCurrentQueued(data);
       setLoading(false);
     });
+    loaded = true;
   } 
 
   // event handlers
@@ -247,6 +251,8 @@ export default function Home() {
                       delete activeJobs[job];
                       setActiveJobs({ ...activeJobs });
                       removeJobFromJSON(job);
+                      const jobToRemove = currentQueued.indexOf(job);
+                      setCurrentQueued([...currentQueued.slice(0, jobToRemove), ...currentQueued.slice(jobToRemove + 1)]);
                       alert(`Job stopped (${job})`);
                   }}>Stop</button> }
                 </div>
