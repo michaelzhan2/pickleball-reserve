@@ -155,8 +155,8 @@ export default function Home() {
   });
   const [currentQueued, setCurrentQueued] = useState([]);
   const[activeJobs, setActiveJobs] = useState({});
-  useEffect(() => {
-    fetch('/api/getData')
+  useEffect(async () => {
+    await fetch('/api/getData')
       .then((response) => response.json())
       .then((data) => setCurrentQueued(data));
   }, [activeJobs]);
