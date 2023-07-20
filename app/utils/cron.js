@@ -1,9 +1,13 @@
 const { CronJob } = require('cron');
 
 
+const BASEURL = process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : 'https://pickleball-reserve-production.up.railway.app/';
+
+
+
 async function scheduleForm(formData) {
   console.log('executing scheduleForm')
-  await fetch('/api/puppeteer', {
+  await fetch(BASEURL + '/api/puppeteer', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -11,7 +15,7 @@ async function scheduleForm(formData) {
     body: JSON.stringify(formData)
   });
   scheduleForm.job.stop();
-  await fetch('/api/deleteData', {
+  await fetch(BASEURL + '/api/deleteData', {
     method: 'DELETE',
     headers: {
       'Content-Type': 'application/json'
@@ -22,7 +26,7 @@ async function scheduleForm(formData) {
 
 
 async function addData(formData) {
-  await fetch('/api/saveData', {
+  await fetch(BASEURL + '/api/saveData', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'

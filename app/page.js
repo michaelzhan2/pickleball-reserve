@@ -7,6 +7,9 @@ import * as Math from 'mathjs'
 import { startCron } from './utils/cron.js'
 
 
+const BASEURL = process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : 'https://pickleball-reserve-production.up.railway.app/';
+
+
 function generateDateOptions (curDate) {
   /*
   * Generates the date options for the date field
@@ -108,11 +111,8 @@ function dateToCron(date) {
 }
 
 
-var loaded = false;
-
-
 async function checkLogin (formData) {
-  let loginCheckResponse = await fetch('/api/checkLogin', {
+  let loginCheckResponse = await fetch(BASEURL + '/api/checkLogin', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -131,7 +131,7 @@ async function checkLogin (formData) {
 
 
 async function removeJobFromJSON (job) {
-  await fetch('/api/deleteData', {
+  await fetch(BASEURL + '/api/deleteData', {
     method: 'DELETE',
     headers: {
       'Content-Type': 'application/json'
@@ -142,9 +142,16 @@ async function removeJobFromJSON (job) {
 
 
 async function getData () {
-  const data = await fetch('/api/getData');
+  const data = await fetch(BASEURL + '/api/readData', {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json'
+      }
+    }
+  );
+  console.log('got data')
   const dataJSON = await data.json();
-  return dataJSON;
+  return dataJSON.jobs;
 }
 
 
@@ -156,6 +163,7 @@ export default function Home() {
   const dates = generateDateOptions(new Date());
   const timeOptions = generateTimeOptions();
 
+  const [firstLoad, setFirstLoad] = useState(true);
   const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
     username: '',
@@ -167,13 +175,14 @@ export default function Home() {
   const [currentQueued, setCurrentQueued] = useState([]);
   const [activeJobs, setActiveJobs] = useState({});
 
-  if (currentQueued.length == 0 && !loaded) {
+  if (currentQueued.length == 0 && firstLoad) {
     // load data from redis
     getData().then(data => {
+      console.log('data:', data)
       setCurrentQueued(data);
       setLoading(false);
     });
-    loaded = true;
+    setFirstLoad(false);
   } 
 
   // event handlers
