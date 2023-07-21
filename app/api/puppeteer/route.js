@@ -80,7 +80,7 @@ export async function POST(request) {
   const startTimeIdx = parseInt(startTimeIdxString);
   const endTimeIdx = parseInt(endTimeIdxString);
 
-  const courtOrder = [14, 12, 15, 17, 13, 16];
+  const courtOrder = [14, 15, 12, 17, 13, 16];
   const timeBlocks = generateTimeBlocks();
 
   var responseBody;

@@ -38,7 +38,7 @@ function generateDateOptions (curDate) {
   }
 
   const dayStrings = [];
-  for (var i = 3; i <= 9; i++) {
+  for (var i = 2; i <= 9; i++) {
     const day = new Date();
     day.setDate(curDate.getDate() + i);
     const dayString = `${dayOfWeek[day.getDay()]}, ${monthOfYear[day.getMonth()]} ${day.getDate()}, ${day.getFullYear()}`;
@@ -126,12 +126,6 @@ async function checkLogin (formData) {
   } 
   return false;
 }
-
-
-
-
-
-
 
 
 export default function Home() {
@@ -247,7 +241,7 @@ export default function Home() {
       </form>
       <div className={ styles['current-jobs'] }>
         <h2>Current Jobs</h2>
-        { currentJobs.map((job, idx) => (
+        { currentJobs.map((job, i) => (
           <div key={ i }>
             <span>{ job }</span>
             <button onClick={ () => removeData(job) }>Remove</button>

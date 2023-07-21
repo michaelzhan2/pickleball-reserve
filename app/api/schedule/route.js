@@ -4,9 +4,12 @@ import { CronJob } from 'cron';
 const jobs = {};
 
 
+const BASE_URL = process.env.NODE_ENV === 'production' ? 'https://pickleball-reserve-production.up.railway.app/' : 'http://localhost:3000';
+
+
 async function submitForm(formData, job) {
   console.log(`Executing submitForm for ${formData.date}`);
-  await fetch ('/api/puppeteer', {
+  await fetch (BASE_URL + '/api/puppeteer', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -14,13 +17,17 @@ async function submitForm(formData, job) {
     body: JSON.stringify(formData)
   })
   .then(response => {
+    jobs[job].stop();
+    delete jobs[job];
     if (!response.ok) {
       throw new Error('Puppeteer failed to execute');
+    } else {
+      console.log(`Successfully executed submitForm for ${formData.date}`);
     }
   })
-
-  jobs[job].stop();
-  delete jobs[job];
+  .catch(error => {
+    console.log(error);
+  });  
 }
 
 
