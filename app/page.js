@@ -4,12 +4,8 @@
 import styles from './page.module.css'
 import { useState, useEffect } from 'react'
 import * as Math from 'mathjs'
-import { startCron } from './utils/cron.js'
 
-
-const BASEURL = process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : 'https://pickleball-reserve-production.up.railway.app/';
-
-
+// Form option generate functions
 function generateDateOptions (curDate) {
   /*
   * Generates the date options for the date field
@@ -77,6 +73,8 @@ function generateTimeOptions () {
   return timeOptions;
 }
 
+
+// Cron pattern generation function
 function dateToCron(date) {
   const monthToNum = {
     'January': 0,
@@ -107,12 +105,12 @@ function dateToCron(date) {
   const reserveDate = new Date();
   reserveDate.setDate(targetDate.getDate() - 2);
   
-  return `0 0 6 ${reserveDate.getDate()} ${reserveDate.getMonth()} *`;
+  return `15 0 6 ${reserveDate.getDate()} ${reserveDate.getMonth()} *`;
 }
 
 
 async function checkLogin (formData) {
-  let loginCheckResponse = await fetch(BASEURL + '/api/checkLogin', {
+  let loginCheckResponse = await fetch('/api/checkLogin', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -130,30 +128,10 @@ async function checkLogin (formData) {
 }
 
 
-async function removeJobFromJSON (job) {
-  await fetch(BASEURL + '/api/deleteData', {
-    method: 'DELETE',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(job)
-  });
-}
 
 
-async function getData () {
-  console.log('getting data');
-  const data = await fetch(BASEURL + '/api/readData', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-      }
-    }
-  );
-  console.log('got data');
-  const dataJSON = await data.json();
-  return dataJSON.jobs;
-}
+
+
 
 
 export default function Home() {
@@ -164,8 +142,7 @@ export default function Home() {
   const dates = generateDateOptions(new Date());
   const timeOptions = generateTimeOptions();
 
-  const [firstLoad, setFirstLoad] = useState(true);
-  const [loading, setLoading] = useState(true);
+  const [currentJobs, setCurrentJobs] = useState([]);
   const [formData, setFormData] = useState({
     username: '',
     password: '',
@@ -173,105 +150,110 @@ export default function Home() {
     startTimeIdxString: 23,
     endTimeIdxString: timeOptions.length - 1
   });
-  const [currentQueued, setCurrentQueued] = useState([]);
-  const [activeJobs, setActiveJobs] = useState({});
 
-  if (currentQueued.length == 0 && firstLoad) {
-    // load data from redis
-    getData().then(data => {
-      console.log('data:', data)
-      setCurrentQueued(data);
-      setLoading(false);
+  // Data routes
+  async function getData () {
+    const response = await fetch('/api/schedule', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      }
     });
-    setFirstLoad(false);
-  } 
+    const data = await response.json();
+    setCurrentJobs(data);
+  }
 
-  // event handlers
-  const handleFormChange = (e) => {
+  async function addData (formData, cronPattern) {
+    const response = await fetch('/api/schedule', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ formData: formData, pattern: cronPattern })
+    });
+    const data = await response.json();
+    setCurrentJobs(data);
+  }
+
+  async function removeData (job) {
+    const response = await fetch('/api/schedule', {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ job: job })
+    });
+    const data = await response.json();
+    setCurrentJobs(data);
+  }
+
+
+  // Event handlers
+  function handleFormChange (e) {
     const { id, value } = e.target;
     setFormData({ ...formData, [id]: value });
   }
 
-  const handleFormSubmit = async (e) => {
+  async function handleFormSubmit (e) {
     e.preventDefault();
-    if (currentQueued.includes(formData.date)) {
+    if (currentJobs.includes(formData.date)) {
       alert('You already have a reservation for this date');
       return;
     }
-    setLoading(true);
     const loginCheckResult = await checkLogin(formData);
     if (!loginCheckResult) {
       return;
     }
-  
+
     const cronPattern = dateToCron(formData.date);
-    const job = await startCron(formData, cronPattern);
-    console.log(2323);
-    console.log(job);
-    console.log(formData.date)
-    setActiveJobs({ ...activeJobs, [formData.date]: job });
-    setCurrentQueued([...currentQueued, formData.date]);
-    setLoading(false);
+    await addData(formData, cronPattern);
   }
+
+  // Load data on startup
+  useEffect(() => {
+    getData();
+  }, []);
+
 
   return (
     <>
-
-      { loading ? (
-        <div className={ styles['loading'] }>
-          <h1>Loading...</h1>
+      <form onSubmit={ handleFormSubmit }>
+        <div className={styles['login-field']}>
+          <label htmlFor="username">Username</label>
+          <input id="username" type="text" placeholder="Username" onChange={ handleFormChange } required />
+          <label htmlFor="password">Password</label>
+          <input id="password" type="password" placeholder="Password" onChange={ handleFormChange } required/>
         </div>
-      ) : (
-        <>
-          <form onSubmit={ handleFormSubmit }>
-            <div className={styles['login-field']}>
-              <label htmlFor="username">Username</label>
-              <input id="username" type="text" placeholder="Username" onChange={ handleFormChange } required />
-              <label htmlFor="password">Password</label>
-              <input id="password" type="password" placeholder="Password" onChange={ handleFormChange } required/>
-            </div>
 
-            <div className={ styles['date-field'] }>
-              <label htmlFor="date">Date</label>
-              <select id="date" defaultValue={ dates[0] } onChange={ handleFormChange } required >
-                { dates.map((date, idx) => <option value={ date } key={ idx }>{ date }</option>) }
-              </select>
-            </div>
+        <div className={ styles['date-field'] }>
+          <label htmlFor="date">Date</label>
+          <select id="date" defaultValue={ dates[0] } onChange={ handleFormChange } required >
+            { dates.map((date, idx) => <option value={ date } key={ idx }>{ date }</option>) }
+          </select>
+        </div>
 
-            <div className={ styles['time-field'] }>
-              <label htmlFor="startTimeIdxString">Start Time</label>
-              <select id="startTimeIdxString" defaultValue={ 23 } onChange={ handleFormChange } required >
-                { timeOptions.map((time, idx) => <option value={ idx } key={ idx }>{ time }</option>) }
-              </select>
-              <label htmlFor="endTimeIdxString">End Time</label>
-              <select id="endTimeIdxString" defaultValue={ timeOptions.length - 1 } onChange={ handleFormChange } required >
-                { timeOptions.map((time, idx) => <option value={ idx } key={ idx }>{ time }</option>) }
-              </select>
-            </div>
+        <div className={ styles['time-field'] }>
+          <label htmlFor="startTimeIdxString">Start Time</label>
+          <select id="startTimeIdxString" defaultValue={ 23 } onChange={ handleFormChange } required >
+            { timeOptions.map((time, idx) => <option value={ idx } key={ idx }>{ time }</option>) }
+          </select>
+          <label htmlFor="endTimeIdxString">End Time</label>
+          <select id="endTimeIdxString" defaultValue={ timeOptions.length - 1 } onChange={ handleFormChange } required >
+            { timeOptions.map((time, idx) => <option value={ idx } key={ idx }>{ time }</option>) }
+          </select>
+        </div>
 
-            <button type="submit">Submit</button>
-          </form>
-          <div className={ styles['current-jobs'] }>
-            <h2>Current Jobs</h2>
-            { currentQueued.map((job, idx) => (
-                <div key={ idx }>
-                  <span>{ job }</span>
-                  { activeJobs[job] && <button type="button" onClick={ () => {
-                      activeJobs[job].stop();
-                      delete activeJobs[job];
-                      setActiveJobs({ ...activeJobs });
-                      removeJobFromJSON(job);
-                      const jobToRemove = currentQueued.indexOf(job);
-                      setCurrentQueued([...currentQueued.slice(0, jobToRemove), ...currentQueued.slice(jobToRemove + 1)]);
-                      alert(`Job stopped (${job})`);
-                  }}>Stop</button> }
-                </div>
-              )
-            )}
+        <button type="submit">Submit</button>
+      </form>
+      <div className={ styles['current-jobs'] }>
+        <h2>Current Jobs</h2>
+        { currentJobs.map((job, idx) => (
+          <div key={ i }>
+            <span>{ job }</span>
+            <button onClick={ () => removeData(job) }>Remove</button>
           </div>
-        </>
-      )}
-      
+        ))}
+      </div>
     </>
   )
 }
