@@ -144,9 +144,11 @@ export default function Home() {
     startTimeIdxString: 23,
     endTimeIdxString: timeOptions.length - 1
   });
+  const [loading, setLoading] = useState(false);
 
   // Data routes
   async function getData () {
+    setLoading(true);
     const response = await fetch('/api/schedule', {
       method: 'GET',
       headers: {
@@ -155,6 +157,7 @@ export default function Home() {
     });
     const data = await response.json();
     setCurrentJobs(data);
+    setLoading(false);
   }
 
   async function addData (formData, cronPattern) {
@@ -189,6 +192,7 @@ export default function Home() {
   }
 
   async function handleFormSubmit (e) {
+    setLoading(true);
     e.preventDefault();
     if (currentJobs.includes(formData.date)) {
       alert('You already have a reservation for this date');
@@ -196,11 +200,13 @@ export default function Home() {
     }
     const loginCheckResult = await checkLogin(formData);
     if (!loginCheckResult) {
+      setLoading(false);
       return;
     }
 
     const cronPattern = dateToCron(formData.date);
     await addData(formData, cronPattern);
+    setLoading(false);
   }
 
   // Load data on startup
@@ -211,6 +217,7 @@ export default function Home() {
 
   return (
     <>
+      { loading && <div className={ styles['loading'] }>Loading...</div> }
       <form onSubmit={ handleFormSubmit }>
         <div className={styles['login-field']}>
           <label htmlFor="username">Username</label>
