@@ -1,10 +1,23 @@
 import { CronJob } from 'cron';
+import { create } from 'mathjs';
 
 
 const jobs = {};
 
 
 const BASE_URL = process.env.NODE_ENV === 'production' ? 'https://pickleball-reserve-production.up.railway.app/' : 'http://localhost:3000';
+
+
+function createReturnableObject () {
+  const res = {};
+  for (const key of Object.keys(jobs)) {
+    res[key] = {
+      startIdx: jobs[key].formData.startTimeIdxString,
+      endIdx: jobs[key].formData.endTimeIdxString
+    }
+  }
+  return res;
+}
 
 
 async function submitForm(formData, job) {
@@ -32,7 +45,7 @@ async function submitForm(formData, job) {
 
 
 export async function GET () {
-  return new Response(JSON.stringify(Object.keys(jobs)), {
+  return new Response(JSON.stringify(createReturnableObject()), {
     headers: {
       'Content-Type': 'application/json'
     }
@@ -44,8 +57,11 @@ export async function POST (request) {
   const data = await request.json();
   const { formData, pattern } = data;
   const wrapper = async () => {await submitForm(formData, formData.date)};
-  jobs[formData.date] = new CronJob(pattern, wrapper, null, true, 'America/Chicago');
-  return new Response(JSON.stringify(Object.keys(jobs)), {
+  jobs[formData.date] = {
+    job: new CronJob(pattern, wrapper, null, true, 'America/Chicago'),
+    formData: formData
+  }
+  return new Response(JSON.stringify(createReturnableObject()), {
     headers: {
       'Content-Type': 'application/json'
     }
@@ -55,10 +71,10 @@ export async function POST (request) {
 
 export async function DELETE (request) {
   const data = await request.json();
-  const job = data.job;
-  jobs[job].stop();
-  delete jobs[job];
-  return new Response(JSON.stringify(Object.keys(jobs)), {
+  const jobName = data.job;
+  jobs[jobName].job.stop();
+  delete jobs[jobName];
+  return new Response(JSON.stringify(createReturnableObject()), {
     headers: {
       'Content-Type': 'application/json'
     }
