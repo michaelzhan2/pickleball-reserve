@@ -128,15 +128,29 @@ async function checkLogin (formData) {
 }
 
 
+function formatCurrentJob (name, start, end, allTimes) {
+  return `Reservation for ${name} from ${allTimes[start]} to ${allTimes[end]}`
+}
+
+
+function convertCurrentJobs (data) {
+  const jobNames = Object.keys(data);
+  const jobStarts = jobNames.map(jobName => parseInt(data[jobName].startIdx));
+  const jobEnds = jobNames.map(jobName => parseInt(data[jobName].endIdx));
+  const newJobs = jobNames.map((jobName, idx) => formatCurrentJob(jobName, jobStarts[idx], jobEnds[idx], timeOptions));
+  return newJobs;
+}
+
+const dates = generateDateOptions(new Date());
+const timeOptions = generateTimeOptions();
+
 export default function Home() {
   /*
   * The main page component
   * @return {JSX} - The main page component
   */
-  const dates = generateDateOptions(new Date());
-  const timeOptions = generateTimeOptions();
-
   const [currentJobs, setCurrentJobs] = useState([]);
+  const [currentJobNames, setCurrentJobNames] = useState([]);
   const [formData, setFormData] = useState({
     username: '',
     password: '',
@@ -144,9 +158,11 @@ export default function Home() {
     startTimeIdxString: 23,
     endTimeIdxString: timeOptions.length - 1
   });
+  const [loading, setLoading] = useState(false);
 
   // Data routes
   async function getData () {
+    setLoading(true);
     const response = await fetch('/api/schedule', {
       method: 'GET',
       headers: {
@@ -154,7 +170,9 @@ export default function Home() {
       }
     });
     const data = await response.json();
-    setCurrentJobs(data);
+    setCurrentJobs(convertCurrentJobs(data));
+    setCurrentJobNames(Object.keys(data));
+    setLoading(false);
   }
 
   async function addData (formData, cronPattern) {
@@ -166,7 +184,8 @@ export default function Home() {
       body: JSON.stringify({ formData: formData, pattern: cronPattern })
     });
     const data = await response.json();
-    setCurrentJobs(data);
+    setCurrentJobs(convertCurrentJobs(data));
+    setCurrentJobNames(Object.keys(data));
   }
 
   async function removeData (job) {
@@ -178,7 +197,8 @@ export default function Home() {
       body: JSON.stringify({ job: job })
     });
     const data = await response.json();
-    setCurrentJobs(data);
+    setCurrentJobs(convertCurrentJobs(data));
+    setCurrentJobNames(Object.keys(data));
   }
 
 
@@ -189,6 +209,7 @@ export default function Home() {
   }
 
   async function handleFormSubmit (e) {
+    setLoading(true);
     e.preventDefault();
     if (currentJobs.includes(formData.date)) {
       alert('You already have a reservation for this date');
@@ -196,11 +217,13 @@ export default function Home() {
     }
     const loginCheckResult = await checkLogin(formData);
     if (!loginCheckResult) {
+      setLoading(false);
       return;
     }
 
     const cronPattern = dateToCron(formData.date);
     await addData(formData, cronPattern);
+    setLoading(false);
   }
 
   // Load data on startup
@@ -211,6 +234,7 @@ export default function Home() {
 
   return (
     <>
+      { loading && <div className={ styles['loading'] }>Loading...</div> }
       <form onSubmit={ handleFormSubmit }>
         <div className={styles['login-field']}>
           <label htmlFor="username">Username</label>
@@ -244,7 +268,7 @@ export default function Home() {
         { currentJobs.map((job, i) => (
           <div key={ i }>
             <span>{ job }</span>
-            <button onClick={ () => removeData(job) }>Remove</button>
+            <button onClick={ () => removeData(currentJobNames[i]) }>Remove</button>
           </div>
         ))}
       </div>
