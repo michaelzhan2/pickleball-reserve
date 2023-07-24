@@ -159,6 +159,7 @@ export default function Home() {
     endTimeIdxString: timeOptions.length - 1
   });
   const [loading, setLoading] = useState(false);
+  const [authenticated, setAuthenticated] = useState(false);
 
   // Data routes
   async function getData () {
@@ -226,6 +227,13 @@ export default function Home() {
     setLoading(false);
   }
 
+  function handlePassword (e) {
+    e.preventDefault();
+    if (e.target.value === process.env.PASSWORD) {
+      setAuthenticated(true);
+    }
+  }
+
   // Load data on startup
   useEffect(() => {
     getData();
@@ -234,44 +242,54 @@ export default function Home() {
 
   return (
     <>
-      { loading && <div className={ styles['loading'] }>Loading...</div> }
-      <form onSubmit={ handleFormSubmit }>
-        <div className={styles['login-field']}>
-          <label htmlFor="username">Username</label>
-          <input id="username" type="text" placeholder="Username" onChange={ handleFormChange } required />
-          <label htmlFor="password">Password</label>
-          <input id="password" type="password" placeholder="Password" onChange={ handleFormChange } required/>
-        </div>
+      { !authenticated && (
+        <form onSubmit={ handlePassword }>
+          <input type="password" placeholder="Password" />
+          <button type="submit">Submit</button>
+        </form>
+      )}
+      { authenticated && (
+        <>
+          { loading && <div className={ styles['loading'] }>Loading...</div> }
+          <form onSubmit={ handleFormSubmit }>
+            <div className={styles['login-field']}>
+              <label htmlFor="username">Username</label>
+              <input id="username" type="text" placeholder="Username" onChange={ handleFormChange } required />
+              <label htmlFor="password">Password</label>
+              <input id="password" type="password" placeholder="Password" onChange={ handleFormChange } required/>
+            </div>
 
-        <div className={ styles['date-field'] }>
-          <label htmlFor="date">Date</label>
-          <select id="date" defaultValue={ dates[0] } onChange={ handleFormChange } required >
-            { dates.map((date, idx) => <option value={ date } key={ idx }>{ date }</option>) }
-          </select>
-        </div>
+            <div className={ styles['date-field'] }>
+              <label htmlFor="date">Date</label>
+              <select id="date" defaultValue={ dates[0] } onChange={ handleFormChange } required >
+                { dates.map((date, idx) => <option value={ date } key={ idx }>{ date }</option>) }
+              </select>
+            </div>
 
-        <div className={ styles['time-field'] }>
-          <label htmlFor="startTimeIdxString">Start Time</label>
-          <select id="startTimeIdxString" defaultValue={ 23 } onChange={ handleFormChange } required >
-            { timeOptions.map((time, idx) => <option value={ idx } key={ idx }>{ time }</option>) }
-          </select>
-          <label htmlFor="endTimeIdxString">End Time</label>
-          <select id="endTimeIdxString" defaultValue={ timeOptions.length - 1 } onChange={ handleFormChange } required >
-            { timeOptions.map((time, idx) => <option value={ idx } key={ idx }>{ time }</option>) }
-          </select>
-        </div>
+            <div className={ styles['time-field'] }>
+              <label htmlFor="startTimeIdxString">Start Time</label>
+              <select id="startTimeIdxString" defaultValue={ 23 } onChange={ handleFormChange } required >
+                { timeOptions.map((time, idx) => <option value={ idx } key={ idx }>{ time }</option>) }
+              </select>
+              <label htmlFor="endTimeIdxString">End Time</label>
+              <select id="endTimeIdxString" defaultValue={ timeOptions.length - 1 } onChange={ handleFormChange } required >
+                { timeOptions.map((time, idx) => <option value={ idx } key={ idx }>{ time }</option>) }
+              </select>
+            </div>
 
-        <button type="submit">Submit</button>
-      </form>
-      <div className={ styles['current-jobs'] }>
-        <h2>Current Jobs</h2>
-        { currentJobs.map((job, i) => (
-          <div key={ i }>
-            <span>{ job }</span>
-            <button onClick={ () => removeData(currentJobNames[i]) }>Remove</button>
+            <button type="submit">Submit</button>
+          </form>
+          <div className={ styles['current-jobs'] }>
+            <h2>Current Jobs</h2>
+            { currentJobs.map((job, i) => (
+              <div key={ i }>
+                <span>{ job }</span>
+                <button onClick={ () => removeData(currentJobNames[i]) }>Remove</button>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
+        </>
+      )}
     </>
   )
 }
