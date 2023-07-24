@@ -230,7 +230,7 @@ export default function Home() {
 
   function handlePassword (e) {
     e.preventDefault();
-    if (e.target.value === process.env.PASSWORD || 1) {
+    if (e.target.value === process.env.PASSWORD) {
       setAuthenticated(true);
     } else {
       alert('Incorrect password');
@@ -268,12 +268,15 @@ export default function Home() {
               </Container>
             </>
           )}
-          <Container fluid className='d-flex flex-column justify-content-center vh-100'>
-            <Row>
-              <Col className='d-flex align-items-center justify-content-center mb-4'>
-                <h1>Schedule a Reservation</h1>
-              </Col>
-            </Row>
+          
+          <Container fluid className={`d-flex flex-column text-center justify-content-end mt-4 ${styles['header']}`}>
+            <h1 className='text-center' style={{maxWidth: '100%', overflow: 'visible'}}>Schedule a Reservation</h1>
+          </Container>
+
+
+
+          <Container fluid className='d-flex flex-column justify-content-start vh-100'>
+            <hr className='d-md-none' />
             <Row className='d-flex justify-content-center'>
               <Col sm={12} md={3} className={`d-flex align-items-center justify-content-center mb-3 ${styles['thin-border']}`}>
                 <Form onSubmit={ handleFormSubmit } className='my-3'>
@@ -311,18 +314,25 @@ export default function Home() {
                   <Button variant="primary" type="submit">Submit</Button>
                 </Form>
               </Col>
+              <hr className='d-md-none' />
               <Col sm={12} md={5} className={`position-relative d-flex flex-column align-items-center mb-3 mx-3 ${styles['thin-border']}`}>
                 <h2>Current Jobs</h2>
-                { currentJobs.length === 0 && (
-                  <h3 style={{color: 'lightgray'}} className='position-absolute top-50 start-50 translate-middle'>No current jobs</h3>
-                )}
-                
-                { currentJobs.map((job, i) => (
-                  <Container key={ i } className='d-flex justify-content-between'>
-                    <span className='mr-auto'>{ job }</span>
-                    <Button variant='danger' onClick={ () => removeData(currentJobNames[i]) }>Remove</Button>
-                  </Container>
-                ))}
+                <Container className='position-relative d-flex flex-column align-items-center my-3'>
+                  { currentJobs.length === 0 && (
+                    <h3 style={{color: 'lightgray', width: '100%', height: '100%'}} className='position-absolute top-50 start-50 translate-middle text-center'>No current jobs</h3>
+                  )}
+                  
+                  { currentJobs.map((job, i) => (
+                    <Container key={ i } className='d-flex justify-content-between mx-0'>
+                      <Col xs={8} className='text-start'>
+                        <span>{ job }</span>
+                      </Col>
+                      <Col xs={3} className='text-end'>
+                        <Button variant='danger' onClick={ () => removeData(currentJobNames[i]) }>Remove</Button>
+                      </Col>
+                    </Container>
+                  ))}
+                </Container>
               </Col>
             </Row>
           </Container>

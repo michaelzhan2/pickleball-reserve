@@ -5,3 +5,29 @@
     margin: 10px;
     background-color: #fff;
 }
+
+.header {
+    background-color: #fff;
+    padding: 10px;
+    margin-bottom: 10px;
+    height: 15vh;
+}
+
+
+@media (max-width: 768px) {
+    .thin-border {
+        border: initial;
+        border-radius: initial;
+        padding: initial;
+        margin: initial;
+        background-color: initial;
+    }
+
+    .header {
+        background-color: initial;
+        padding: initial;
+        margin-bottom: initial;
+        height: initial;
+    }
+}
+
