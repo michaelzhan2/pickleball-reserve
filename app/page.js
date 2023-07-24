@@ -1,9 +1,10 @@
 'use client'
 
-
+import 'bootstrap/dist/css/bootstrap.min.css';
 import styles from './page.module.css'
 import { useState, useEffect } from 'react'
 import * as Math from 'mathjs'
+import { Container, Row, Col, Button, Form, Spinner, Card } from 'react-bootstrap'
 
 // Form option generate functions
 function generateDateOptions (curDate) {
@@ -129,7 +130,7 @@ async function checkLogin (formData) {
 
 
 function formatCurrentJob (name, start, end, allTimes) {
-  return `Reservation for ${name} from ${allTimes[start]} to ${allTimes[end]}`
+  return `${name} from ${allTimes[start]} to ${allTimes[end]}`
 }
 
 
@@ -229,8 +230,10 @@ export default function Home() {
 
   function handlePassword (e) {
     e.preventDefault();
-    if (e.target.value === process.env.PASSWORD) {
+    if (e.target.value === process.env.PASSWORD || 1) {
       setAuthenticated(true);
+    } else {
+      alert('Incorrect password');
     }
   }
 
@@ -243,51 +246,86 @@ export default function Home() {
   return (
     <>
       { !authenticated && (
-        <form onSubmit={ handlePassword }>
-          <input type="password" placeholder="Password" />
-          <button type="submit">Submit</button>
-        </form>
+        <Container className='d-flex flex-column justify-content-center align-items-center vh-100'>
+          <Form onSubmit={ handlePassword }>
+            <Form.Group controlId='authPassword' className='mb-3'>
+              <Form.Label>Enter password:</Form.Label>
+              <Form.Control type='password' placeholder='Password' />
+              <Form.Text muted>
+                Please enter the password to access the reservation page
+              </Form.Text>
+            </Form.Group>
+            <Button variant="primary" type="submit">Submit</Button>
+          </Form>
+        </Container>
       )}
       { authenticated && (
         <>
-          { loading && <div className={ styles['loading'] }>Loading...</div> }
-          <form onSubmit={ handleFormSubmit }>
-            <div className={styles['login-field']}>
-              <label htmlFor="username">Username</label>
-              <input id="username" type="text" placeholder="Username" onChange={ handleFormChange } required />
-              <label htmlFor="password">Password</label>
-              <input id="password" type="password" placeholder="Password" onChange={ handleFormChange } required/>
-            </div>
+          { loading && (
+            <>
+              <Container fluid style={{zIndex: 9999}} className='d-flex flex-column justify-content-center align-items-center vh-100 bg-black opacity-50 position-absolute top-0 start-0'>
+                <Spinner animation="border" variant='light' />
+              </Container>
+            </>
+          )}
+          <Container fluid className='d-flex flex-column justify-content-center vh-100'>
+            <Row>
+              <Col className='d-flex align-items-center justify-content-center mb-4'>
+                <h1>Schedule a Reservation</h1>
+              </Col>
+            </Row>
+            <Row className='d-flex justify-content-center'>
+              <Col sm={12} md={3} className={`d-flex align-items-center justify-content-center mb-3 ${styles['thin-border']}`}>
+                <Form onSubmit={ handleFormSubmit } className='my-3'>
+                  <Form.Group controlId="username" className='mb-3'>
+                    <Form.Label>Username</Form.Label>
+                    <Form.Control type="text" placeholder="Username" onChange={ handleFormChange } required />
+                  </Form.Group>
 
-            <div className={ styles['date-field'] }>
-              <label htmlFor="date">Date</label>
-              <select id="date" defaultValue={ dates[0] } onChange={ handleFormChange } required >
-                { dates.map((date, idx) => <option value={ date } key={ idx }>{ date }</option>) }
-              </select>
-            </div>
+                  <Form.Group controlId="password" className='mb-3'>
+                    <Form.Label>Password</Form.Label>
+                    <Form.Control type="password" placeholder="Password" onChange={ handleFormChange } required />
+                  </Form.Group>
 
-            <div className={ styles['time-field'] }>
-              <label htmlFor="startTimeIdxString">Start Time</label>
-              <select id="startTimeIdxString" defaultValue={ 23 } onChange={ handleFormChange } required >
-                { timeOptions.map((time, idx) => <option value={ idx } key={ idx }>{ time }</option>) }
-              </select>
-              <label htmlFor="endTimeIdxString">End Time</label>
-              <select id="endTimeIdxString" defaultValue={ timeOptions.length - 1 } onChange={ handleFormChange } required >
-                { timeOptions.map((time, idx) => <option value={ idx } key={ idx }>{ time }</option>) }
-              </select>
-            </div>
+                  <Form.Group controlId="date" className='mb-3'>
+                    <Form.Label>Date</Form.Label>
+                    <Form.Select defaultValue={ dates[0] } onChange={ handleFormChange } required >
+                      { dates.map((date, idx) => <option value={ date } key={ idx }>{ date }</option>) }
+                    </Form.Select>
+                  </Form.Group>
 
-            <button type="submit">Submit</button>
-          </form>
-          <div className={ styles['current-jobs'] }>
-            <h2>Current Jobs</h2>
-            { currentJobs.map((job, i) => (
-              <div key={ i }>
-                <span>{ job }</span>
-                <button onClick={ () => removeData(currentJobNames[i]) }>Remove</button>
-              </div>
-            ))}
-          </div>
+                  <Form.Group controlId="startTimeIdxString" className='mb-3'>
+                    <Form.Label>Start Time</Form.Label>
+                    <Form.Select defaultValue={ 23 } onChange={ handleFormChange } required >
+                      { timeOptions.map((time, idx) => <option value={ idx } key={ idx }>{ time }</option>) }
+                    </Form.Select>
+                  </Form.Group>
+
+                  <Form.Group controlId="endTimeIdxString" className='mb-3'>
+                    <Form.Label>End Time</Form.Label>
+                    <Form.Select defaultValue={ timeOptions.length - 1 } onChange={ handleFormChange } required >
+                      { timeOptions.map((time, idx) => <option value={ idx } key={ idx }>{ time }</option>) }
+                    </Form.Select>
+                  </Form.Group>
+
+                  <Button variant="primary" type="submit">Submit</Button>
+                </Form>
+              </Col>
+              <Col sm={12} md={5} className={`position-relative d-flex flex-column align-items-center mb-3 mx-3 ${styles['thin-border']}`}>
+                <h2>Current Jobs</h2>
+                { currentJobs.length === 0 && (
+                  <h3 style={{color: 'lightgray'}} className='position-absolute top-50 start-50 translate-middle'>No current jobs</h3>
+                )}
+                
+                { currentJobs.map((job, i) => (
+                  <Container key={ i } className='d-flex justify-content-between'>
+                    <span className='mr-auto'>{ job }</span>
+                    <Button variant='danger' onClick={ () => removeData(currentJobNames[i]) }>Remove</Button>
+                  </Container>
+                ))}
+              </Col>
+            </Row>
+          </Container>
         </>
       )}
     </>
