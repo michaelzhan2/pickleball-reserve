@@ -324,7 +324,7 @@ export default function Home() {
                   )}
                   
                   { currentJobs.map((job, i) => (
-                    <Container key={ i } className='d-flex justify-content-between mx-0'>
+                    <Container key={ i } className='d-flex justify-content-between mx-0 mb-3'>
                       <Col xs={8} className='text-start'>
                         <span>{ job }</span>
                       </Col>
