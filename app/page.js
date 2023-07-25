@@ -161,6 +161,7 @@ export default function Home() {
   });
   const [loading, setLoading] = useState(false);
   const [authenticated, setAuthenticated] = useState(false);
+  const [authPassword, setAuthPassword] = useState('');
 
   // Data routes
   async function getData () {
@@ -230,7 +231,7 @@ export default function Home() {
 
   function handlePassword (e) {
     e.preventDefault();
-    if (e.target.value === process.env.PASSWORD) {
+    if (authPassword === process.env.NEXT_PUBLIC_PASSWORDAUTH) {
       setAuthenticated(true);
     } else {
       alert('Incorrect password');
@@ -250,7 +251,7 @@ export default function Home() {
           <Form onSubmit={ handlePassword }>
             <Form.Group controlId='authPassword' className='mb-3'>
               <Form.Label>Enter password:</Form.Label>
-              <Form.Control type='password' placeholder='Password' />
+              <Form.Control type='password' placeholder='Password' name='password' onChange={ (e) => setAuthPassword(e.target.value) }/>
               <Form.Text muted>
                 Please enter the password to access the reservation page
               </Form.Text>
@@ -275,10 +276,10 @@ export default function Home() {
 
 
 
-          <Container fluid className='d-flex flex-column justify-content-start vh-100'>
+          <Container fluid className='d-flex flex-column justify-content-start'>
             <hr className='d-md-none' />
             <Row className='d-flex justify-content-center'>
-              <Col sm={12} md={3} className={`d-flex align-items-center justify-content-center mb-3 ${styles['thin-border']}`}>
+              <Col sm={12} md={4} lg={3} className={`d-flex align-items-center justify-content-center mb-3 ${styles['thin-border']}`}>
                 <Form onSubmit={ handleFormSubmit } className='my-3'>
                   <Form.Group controlId="username" className='mb-3'>
                     <Form.Label>Username</Form.Label>
@@ -315,7 +316,7 @@ export default function Home() {
                 </Form>
               </Col>
               <hr className='d-md-none' />
-              <Col sm={12} md={5} className={`position-relative d-flex flex-column align-items-center mb-3 mx-3 ${styles['thin-border']}`}>
+              <Col sm={12} md={6} lg={5} className={`position-relative d-flex flex-column align-items-center mb-3 mx-3 ${styles['thin-border']}`}>
                 <h2>Current Jobs</h2>
                 <Container className='position-relative d-flex flex-column align-items-center my-3'>
                   { currentJobs.length === 0 && (
