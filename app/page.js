@@ -214,7 +214,7 @@ export default function Home() {
   async function handleFormSubmit (e) {
     setLoading(true);
     e.preventDefault();
-    if (currentJobs.includes(formData.date)) {
+    if (currentJobNames.includes(formData.date)) {
       alert('You already have a reservation for this date');
       return;
     }
