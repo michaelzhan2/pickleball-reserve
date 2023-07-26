@@ -216,6 +216,7 @@ export default function Home() {
     e.preventDefault();
     if (currentJobNames.includes(formData.date)) {
       alert('You already have a reservation for this date');
+      setLoading(false);
       return;
     }
     const loginCheckResult = await checkLogin(formData);
