@@ -30,7 +30,7 @@ async function submitForm(formData, job) {
     body: JSON.stringify(formData)
   })
   .then(response => {
-    jobs[job].stop();
+    jobs[job].job.stop();
     delete jobs[job];
     if (!response.ok) {
       throw new Error('Puppeteer failed to execute');
