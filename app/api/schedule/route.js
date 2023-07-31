@@ -21,7 +21,7 @@ function createReturnableObject () {
 
 
 async function submitForm(formData, job) {
-  console.log(`Executing submitForm for ${formData.date}`);
+  console.log(`Executing submitForm for ${formData.date} at ${new Date().toLocaleString()}`);
   await fetch (BASE_URL + '/api/puppeteer', {
     method: 'POST',
     headers: {
@@ -55,12 +55,22 @@ export async function GET () {
 
 export async function POST (request) {
   const data = await request.json();
-  const { formData, pattern } = data;
+  // const { formData, pattern } = data;
+  const { formData } = data;
+
+  const currentDateTime = new Date();
+  const schedule5MinutesFromNow = new Date(currentDateTime.getTime() + 1 * 60000);
+  const newCronPattern = `0 ${schedule5MinutesFromNow.getMinutes()} ${schedule5MinutesFromNow.getHours()} ${schedule5MinutesFromNow.getDate()} ${schedule5MinutesFromNow.getMonth()} *`;
+  const pattern = newCronPattern;
+
+
+
   const wrapper = async () => {await submitForm(formData, formData.date)};
   jobs[formData.date] = {
     job: new CronJob(pattern, wrapper, null, true, 'America/Chicago'),
     formData: formData
   }
+  console.log(`Scheduled job for ${formData.date} at ${new Date().toLocaleString()}`)
   return new Response(JSON.stringify(createReturnableObject()), {
     headers: {
       'Content-Type': 'application/json'
