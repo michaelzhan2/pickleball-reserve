@@ -56,6 +56,7 @@ export async function GET () {
 export async function POST (request) {
   const data = await request.json();
   const { formData, pattern } = data;
+  console.log(pattern);
 
   const wrapper = async () => {await submitForm(formData, formData.date)};
   jobs[formData.date] = {
