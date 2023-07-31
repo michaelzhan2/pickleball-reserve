@@ -63,7 +63,7 @@ export async function POST (request) {
     job: new CronJob(pattern, wrapper, null, true, 'America/Chicago'),
     formData: formData
   }
-  console.log(`Scheduled job for ${formData.date} at ${new Date().toLocaleString()}`)
+  console.log(`Scheduled job for ${formData.date} with pattern ${pattern}`)
   return new Response(JSON.stringify(createReturnableObject()), {
     headers: {
       'Content-Type': 'application/json'

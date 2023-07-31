@@ -102,12 +102,10 @@ function dateToCron(date) {
   targetDate.setMonth(month);
   targetDate.setDate(day);
   targetDate.setFullYear(year);
-  
-  const reserveDate = new Date();
-  reserveDate.setDate(targetDate.getDate() - 2);
-  
-  // return `0 3 6 ${reserveDate.getDate()} ${reserveDate.getMonth()} *`;
-  return `0 5 11 ${reserveDate.getDate()} ${reserveDate.getMonth()} *`;
+
+  targetDate.setDate(targetDate.getDate() - 2);
+
+  return `15 0 6 ${targetDate.getDate()} ${targetDate.getMonth()} *`;
 }
 
 
