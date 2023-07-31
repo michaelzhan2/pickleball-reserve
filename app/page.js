@@ -4,7 +4,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import styles from './page.module.css'
 import { useState, useEffect } from 'react'
 import * as Math from 'mathjs'
-import { Container, Row, Col, Button, Form, Spinner, Card } from 'react-bootstrap'
+import { Container, Row, Col, Button, Form, Spinner } from 'react-bootstrap'
 
 // Form option generate functions
 function generateDateOptions (curDate) {
@@ -39,7 +39,7 @@ function generateDateOptions (curDate) {
   }
 
   const dayStrings = [];
-  for (var i = 2; i <= 9; i++) {
+  for (var i = 3; i <= 9; i++) {
     const day = new Date();
     day.setDate(curDate.getDate() + i);
     const dayString = `${dayOfWeek[day.getDay()]}, ${monthOfYear[day.getMonth()]} ${day.getDate()}, ${day.getFullYear()}`;
