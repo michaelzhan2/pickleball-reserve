@@ -55,21 +55,11 @@ export async function GET () {
 
 export async function POST (request) {
   const data = await request.json();
-  // const { formData, pattern } = data;
-  const { formData } = data;
-
-  const currentDateTime = new Date();
-  const schedule5MinutesFromNow = new Date(currentDateTime.getTime() + 1 * 60000);
-  const newCronPattern = `0 ${schedule5MinutesFromNow.getMinutes()} ${schedule5MinutesFromNow.getHours()} ${schedule5MinutesFromNow.getDate()} ${schedule5MinutesFromNow.getMonth()} *`;
-  const pattern = newCronPattern;
-  const timezone = 'utc'
-  // const timezone = 'America/Chicago'
-
-
+  const { formData, pattern } = data;
 
   const wrapper = async () => {await submitForm(formData, formData.date)};
   jobs[formData.date] = {
-    job: new CronJob(pattern, wrapper, null, true, timezone),
+    job: new CronJob(pattern, wrapper, null, true, 'America/Chicago'),
     formData: formData
   }
   console.log(`Scheduled job for ${formData.date} at ${new Date().toLocaleString()}`)
