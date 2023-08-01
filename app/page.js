@@ -105,7 +105,7 @@ function dateToCron(date) {
 
   targetDate.setDate(targetDate.getDate() - 2);
 
-  return `15 0 6 ${targetDate.getDate()} ${targetDate.getMonth()} *`;
+  return `10 0 6 ${targetDate.getDate()} ${targetDate.getMonth()} *`;
 }
 
 
