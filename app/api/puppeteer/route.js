@@ -80,7 +80,14 @@ export async function POST(request) {
   const startTimeIdx = parseInt(startTimeIdxString);
   const endTimeIdx = parseInt(endTimeIdxString);
 
-  const courtOrder = [14, 15, 12, 17, 13, 16];
+  const courtOrder = [
+    'Williams Pickleball - Court #3',
+    'Williams Pickleball - Court #4',
+    'Williams Pickleball - Court #1',
+    'Williams Pickleball - Court #6',
+    'Williams Pickleball - Court #2',
+    'Williams Pickleball - Court #5'
+  ];
   const timeBlocks = generateTimeBlocks();
 
   var responseBody;
@@ -137,17 +144,28 @@ export async function POST(request) {
 
     // try to select courts at each time block
     var success = false;
+    const courtContainerSelector = '#crwebsearch_nextgenresultsgroup > div.rect.group__inner';
     for (var window = 3; window > 0; window--) {
       for (var timeIdx = startTimeIdx; timeIdx <= endTimeIdx - window; timeIdx++) {
-        for (const courtNum of courtOrder) {
-          const courtSelector = `#crwebsearch_nextgenresultsgroup > div.rect.group__inner > div:nth-child(${courtNum})`;
-          const court = await page.waitForSelector(courtSelector);
+        for (const courtName of courtOrder) {
+          const courtHandle = await page.evaluateHandle((courtContainerSelector, courtName) => {
+            console.log('courtContainerSelector', courtContainerSelector)
+            console.log('courtName', courtName)
+            const courtContainer = document.querySelector(courtContainerSelector);
+            const courts = courtContainer.querySelectorAll('div.result-content');
+            for (const court of courts) {
+              const courtNameElement = court.querySelector('h2');
+              if (courtNameElement.textContent === courtName) {
+                return court;
+              }
+            }
+          }, courtContainerSelector, courtName);
+          const court = await courtHandle.asElement()
 
           // check if the time block is available
           var validTimes = true;
           for (var i = timeIdx; i < timeIdx + window; i++) {
-            const timeBlockExists = await page.evaluate((courtSelector, timeBlock) => {
-              const court = document.querySelector(courtSelector);
+            const timeBlockExists = await page.evaluate((court, timeBlock) => {
               const courtTimeOptions = court.querySelectorAll('tbody > tr:nth-child(2) a');
               blockFound = false;
               for (const courtTimeOption of courtTimeOptions) {
@@ -157,7 +175,7 @@ export async function POST(request) {
                 }
               }
               return blockFound;
-            }, courtSelector, timeBlocks[i]);
+            }, court, timeBlocks[i]);
             if (!timeBlockExists) {
               validTimes = false;
               break;
