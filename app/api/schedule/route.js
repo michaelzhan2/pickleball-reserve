@@ -1,11 +1,10 @@
 import { CronJob } from 'cron';
-import { create } from 'mathjs';
 
 
 const jobs = {};
 
 
-const BASE_URL = process.env.NODE_ENV === 'production' ? 'https://pickleball-reserve-production.up.railway.app/' : 'http://localhost:3000';
+const BASE_URL = process.env.NODE_ENV === 'production' ? 'https://reserve.michaelzhan.me' : 'http://localhost:3000';
 
 
 function createReturnableObject () {
