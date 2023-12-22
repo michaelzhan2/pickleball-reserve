@@ -40,8 +40,8 @@ export const monthToNum: {[key: string]: number} = {
 }
 
 // functions
-export function generateDateOptions(): string[] {
-  const dates: string[] = [];
+export function generateDateOptions(): {date: number, month: number, year: number, description: string}[] {
+  const dates: {date: number, month: number, year: number, description: string}[] = [];
   const curDate: Date = new Date();
   curDate.setDate(curDate.getDate() + 3);
   
@@ -54,7 +54,12 @@ export function generateDateOptions(): string[] {
     month = numToMonth[curDate.getMonth()];
     dateNumber = curDate.getDate();
     year = curDate.getFullYear();
-    dates.push(`${day}, ${month} ${dateNumber}, ${year}`);
+    dates.push({
+      date: dateNumber,
+      month: curDate.getMonth(),
+      year: year,
+      description: `${day}, ${month} ${dateNumber}, ${year}`
+    });
     curDate.setDate(curDate.getDate() + 1);
   }
   return dates;
@@ -63,9 +68,11 @@ export function generateDateOptions(): string[] {
 export function generateTimeOptions(): string[] {
   const times = [];
   let time = 8;
+  let hourString: string;
   while (time <= 22) {
-    times.push(`${(time - 1) % 12 + 1}:00 ${time < 12 ? 'AM' : 'PM'}`);
-    if (time !== 22) times.push(`${(time - 1) % 12 + 1}:30 ${time < 12 ? 'AM' : 'PM'}`);
+    hourString = `${(time - 1) % 12 + 1 < 10 ? '0' : ''}${(time - 1) % 12 + 1}`
+    times.push(`${hourString}:00 ${time < 12 ? 'AM' : 'PM'}`);
+    if (time !== 22) times.push(`${hourString}:30 ${time < 12 ? 'AM' : 'PM'}`);
     time++;
   }
   return times;
