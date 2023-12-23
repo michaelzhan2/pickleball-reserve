@@ -2,6 +2,7 @@
 
 
 import CryptoJS from 'crypto-js';
+import { useState, useEffect } from 'react';
 import { generateDateOptions, timeOptions } from '@/utils/dateTime'
 import { PuppeteerInfo, LoginInfo } from '@/types/api'
 
@@ -9,22 +10,32 @@ import { PuppeteerInfo, LoginInfo } from '@/types/api'
 const dateOptions = generateDateOptions();
 
 
+
+
 export default function Home() {
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    console.log((e.target as HTMLFormElement).date.value)
-    console.log((e.target as HTMLFormElement).startTime.value)
+  const [ids, setIds] = useState<string[]>([]);
+  
+  async function loadIds() {
+    const res = await fetch('/api/schedule');
+    const data = await res.json();
+    setIds(data);
   }
 
-  const handleTest = async (e: React.FormEvent<HTMLButtonElement>) => {
+  useEffect(() => {
+    loadIds();
+  }, [])
+
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    let username: string = process.env.NEXT_PUBLIC_USERNAME || '';
-    let password: string = process.env.NEXT_PUBLIC_PASSWORD || '';
-    let date = 24;
-    let month = 11;
-    let year = 2023;
-    let startTime = 2;
-    let endTime = 6;
+    let username = (e.target as HTMLFormElement).username.value;
+    let password = (e.target as HTMLFormElement).password.value;
+    let dateIdx = (e.target as HTMLFormElement).date.value;
+    let date = dateOptions[dateIdx].date;
+    let month = dateOptions[dateIdx].month;
+    let year = dateOptions[dateIdx].year;
+    let startTime: number = parseFloat((e.target as HTMLFormElement).startTime.value);
+    let endTime: number = parseFloat((e.target as HTMLFormElement).endTime.value);
     let courtOrder = [3, 4, 1, 6, 2, 5];
     let encryptedPassword: string = CryptoJS.AES.encrypt(password, process.env.NEXT_PUBLIC_CRYPTO_KEY || '').toString();
     
@@ -33,19 +44,19 @@ export default function Home() {
       encryptedPassword: encryptedPassword
     }
 
-    // const loginCheck = await fetch('/api/checkLogin', {
-    //   method: 'POST',
-    //   headers: {
-    //     'Content-Type': 'application/json'
-    //   },
-    //   body: JSON.stringify(loginInfo)
-    // })
-    // if (!loginCheck.ok) {
-    //   alert('Login failed')
-    //   return;
-    // } else {
-    //   console.log(`Login successful for ${username}`)
-    // }
+    const loginCheck = await fetch('/api/checkLogin', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(loginInfo)
+    })
+    if (!loginCheck.ok) {
+      alert('Login failed')
+      return;
+    } else {
+      console.log(`Login successful for ${username}`)
+    }
     
     const puppeteerInfo: PuppeteerInfo = {
       username: username,
@@ -58,7 +69,7 @@ export default function Home() {
       courtOrder: courtOrder
     }
 
-    fetch('/api/puppeteer', {
+    const scheduleRes = await fetch('/api/schedule', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -66,8 +77,12 @@ export default function Home() {
       body: JSON.stringify(puppeteerInfo),
       cache: 'no-cache'
     })
+    if (!scheduleRes.ok) {
+      alert('Scheduling failed');
+      return;
+    }
 
-    
+    await loadIds();
   }
 
   return (
@@ -100,14 +115,18 @@ export default function Home() {
         </form>
       </div>
       <div>
-        <button type="button" onClick={handleTest} className='border border-black bg-blue-200'>Test</button>
+        <button type="button" className='border border-black bg-blue-200'>Test</button>
       </div>
       <div>
         <div>
           Current jobs
         </div>
         <div>
-
+          {ids.map((id, idx) => (
+            <div key={idx}>
+              {id}
+            </div>
+          ))}
         </div>
       </div>
     </>

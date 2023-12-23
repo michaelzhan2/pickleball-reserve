@@ -2,7 +2,6 @@ import CryptoJS from "crypto-js";
 import puppeteer, { ElementHandle } from "puppeteer";
 import { PuppeteerInfo } from "@/types/api";
 import { timeOptions } from "@/utils/dateTime";
-import { courtMap } from "@/utils/courts";
 import { delay } from "@/utils/delay";
 
 
@@ -13,11 +12,9 @@ export async function POST(request: Request) {
   const body: PuppeteerInfo = await request.json();
   const { username, encryptedPassword, date, month, year, startTime, endTime, courtOrder } = body;
   const password = CryptoJS.AES.decrypt(encryptedPassword, process.env.NEXT_PUBLIC_CRYPTO_KEY || '').toString(CryptoJS.enc.Utf8);
-  console.log({ date, month, year, startTime, endTime})
 
   const browser = await puppeteer.launch({
-    headless: false,
-    // headless: 'new',
+    headless: 'new',
     args: [
       '--no-sandbox',
       '--disable-setuid-sandbox',
@@ -38,10 +35,10 @@ export async function POST(request: Request) {
     page.on('dialog', async dialog => {
       responseBody = dialog.message();
       responseStatus = 403;
-      console.log(dialog.message());
       await dialog.dismiss();
+      loginFailed = true;
     })
-    await page.waitForNetworkIdle(); // wait for any dialogs to show
+    await delay(1000); // wait for any dialogs to show
     if (loginFailed) {
       throw new Error(responseBody);
     }
@@ -56,6 +53,8 @@ export async function POST(request: Request) {
     let done = false;
     let dateCells, dateCell, dateCellText;
     let dateFound = false;
+    let startSelected;
+    let children;
     for (let window = 3; window > 0; window--) {
       for (let c = 0; c < courtOrder.length; c++) {
         court = courtOrder[c];
@@ -72,6 +71,9 @@ export async function POST(request: Request) {
         await delay(200);
         const dateTable = await page.waitForSelector('[id^=rec1-catalog-reservation-date-] > div > table > tbody');
         const dateRows = await dateTable?.$$('tr');
+
+        if (!dateRows) throw new Error('Calendar date selection failed');
+
         dateFound = false;
         for (let i = 0; i < dateRows.length; i++) {
           dateCells = await dateRows[i].$$('td');
@@ -87,22 +89,29 @@ export async function POST(request: Request) {
           if (dateFound) break;
         }
 
-        await delay(200);
+        await delay(500);
         startTimeDropdown = await page.waitForSelector('[id^=popover] > div.popover-content > div > div.ui-col-7.ui-offset-lg > form > div.reservation-hours > div > select.ui-selectmenu.rec1-catalog-reservation-hours-from.notranslate');
+        if (!startTimeDropdown) throw new Error('Start time dropdown not found');
+
         startTimeOptions = await page.evaluate(select => {
-          const options = select.querySelectorAll('option');
+          const options = (select as HTMLSelectElement).querySelectorAll('option');
           return Array.from(options).map(option => [option.textContent, option.value]);
         }, startTimeDropdown);
 
+        if (!startTimeOptions) continue;
+
         for (let i = startTime; i <= endTime - window; i++) {
           startTimeString = timeOptions[i];
+          startSelected = false;
           for (let j = 0; j < startTimeOptions.length; j++) {
             if (startTimeOptions[j][0] === startTimeString) {
-              await startTimeDropdown?.select(startTimeOptions[j][1]);
-              console.log(`selected start ${startTimeOptions[j][0]} with value ${startTimeOptions[j][1]}`)
+              await startTimeDropdown.select((startTimeOptions as string[][])[j][1]);
+              console.log(`Selected start ${startTimeOptions[j][0]}`)
+              startSelected = true;
               break;
             }
           }
+          if (!startSelected) continue;
   
   
   
@@ -113,23 +122,28 @@ export async function POST(request: Request) {
           endTimeDropdown = await page.waitForSelector('body > div.selectmenu-items.notranslate.open > div.selectmenu-spacer-foreground');
   
           endTimeOptions = await page.evaluate(select => {
-            const options = select.querySelectorAll('div');
+            const options = (select as HTMLDivElement).querySelectorAll('div');
             return Array.from(options).map(option => option.textContent);
           }, endTimeDropdown);
   
-          endTimeString = timeOptions[i + window];
+          endTimeString = timeOptions[`${i + window}`];
           for (let j = 0; j < endTimeOptions.length; j++) {
             if (endTimeOptions[j] === endTimeString) {
-              let children = await endTimeDropdown?.$$('div');
+              children = await endTimeDropdown?.$$('div');
+              if (!children) continue;
               await children[j].evaluate((e) => e.click());
   
               // await endTimeDropdown?.waitForSelector('div')
-              console.log(`selected end ${endTimeOptions[j]}`)
+              console.log(`Selected end ${endTimeOptions[j]}`)
               done = true;
               break;
             }
           }
-          if (done) break;
+          if (done) {
+            break;
+          } else {
+            console.log(`End time ${endTimeString} not found`)
+          }
         }
         if (done) break;
         
@@ -144,21 +158,20 @@ export async function POST(request: Request) {
     await delay(1000);
     await page.waitForSelector('[id^=popover] > div.popover-content > div > div.ui-col-7.ui-offset-lg > form > div.text-left > div > button').then((el) => el?.evaluate((e) => e.click()));
     await delay(1000);
-    await page.waitForSelector('body > div.rec1-catalog-cart.ui-dropdown.ui-dropdown-plain.floatable.ui-dropdown-open > div > div.cart-contents-total > table > tbody > tr:nth-child(2) > td > a').then((el) => el?.evaluate((e) => e.click()));
+    await page.waitForSelector('body > div.rec1-catalog-cart > div > div.cart-contents-total > table > tbody > tr:nth-child(2) > td > a').then((el) => el?.evaluate((e) => e.click()));
     await delay(1000);
     await page.waitForSelector('#rec1-public-wrapper > div.ui-page > div:nth-child(8) > div.ui-control-panel-right.pull-right > div.text-right.ui-inset > button').then((el) => el?.evaluate((e) => e.click()));
     await delay(1000);
     await page.waitForSelector('#rec1-public-wrapper > div.ui-page > div:nth-child(8) > div.ui-control-panel-right.pull-right > div.text-right.ui-inset > button').then((el) => el?.evaluate((e) => e.click()));
+    await delay(5000);
 
-    // logout
-    await page.waitForNetworkIdle();
-    await page.goto('https://secure.rec1.com/TX/up-tx/account/logout');
+    console.log('Reservation successful')
   } catch (e: any) {
     responseBody = e.message;
     console.log(e.message)
     responseStatus = 500;
   } finally {
-    // await browser.close();
+    await browser.close();
   }
 
   return new Response(responseBody, { status: responseStatus });
