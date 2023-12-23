@@ -4,8 +4,9 @@ export interface PuppeteerInfo {
   date: number;
   month: number;
   year: number;
-  startTime: string;
-  endTime: string;
+  startTime: number;
+  endTime: number;
+  courtOrder: number[];
 }
 
 

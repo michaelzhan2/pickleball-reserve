@@ -2,12 +2,11 @@
 
 
 import CryptoJS from 'crypto-js';
-import { generateDateOptions, generateTimeOptions } from '@/utils/dateTime'
+import { generateDateOptions, timeOptions } from '@/utils/dateTime'
 import { PuppeteerInfo, LoginInfo } from '@/types/api'
 
 
 const dateOptions = generateDateOptions();
-const timeOptions = generateTimeOptions();
 
 
 export default function Home() {
@@ -21,12 +20,33 @@ export default function Home() {
     e.preventDefault();
     let username: string = process.env.NEXT_PUBLIC_USERNAME || '';
     let password: string = process.env.NEXT_PUBLIC_PASSWORD || '';
-    let date = dateOptions[0].date;
-    let month = dateOptions[0].month;
-    let year = dateOptions[0].year;
-    let startTime = timeOptions[23];
-    let endTime = timeOptions[27];
+    let date = 24;
+    let month = 11;
+    let year = 2023;
+    let startTime = 2;
+    let endTime = 6;
+    let courtOrder = [3, 4, 1, 6, 2, 5];
     let encryptedPassword: string = CryptoJS.AES.encrypt(password, process.env.NEXT_PUBLIC_CRYPTO_KEY || '').toString();
+    
+    const loginInfo: LoginInfo = {
+      username: username,
+      encryptedPassword: encryptedPassword
+    }
+
+    // const loginCheck = await fetch('/api/checkLogin', {
+    //   method: 'POST',
+    //   headers: {
+    //     'Content-Type': 'application/json'
+    //   },
+    //   body: JSON.stringify(loginInfo)
+    // })
+    // if (!loginCheck.ok) {
+    //   alert('Login failed')
+    //   return;
+    // } else {
+    //   console.log(`Login successful for ${username}`)
+    // }
+    
     const puppeteerInfo: PuppeteerInfo = {
       username: username,
       encryptedPassword: encryptedPassword,
@@ -34,30 +54,19 @@ export default function Home() {
       month: month,
       year: year,
       startTime: startTime,
-      endTime: endTime
+      endTime: endTime,
+      courtOrder: courtOrder
     }
-
-    const loginInfo: LoginInfo = {
-      username: username,
-      encryptedPassword: encryptedPassword
-    }
-
 
     fetch('/api/puppeteer', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(puppeteerInfo)
+      body: JSON.stringify(puppeteerInfo),
+      cache: 'no-cache'
     })
 
-    const loginCheck = await fetch('/api/checkLogin', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(loginInfo)
-    })
     
   }
 

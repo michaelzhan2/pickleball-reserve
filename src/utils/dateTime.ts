@@ -43,7 +43,7 @@ export const monthToNum: {[key: string]: number} = {
 export function generateDateOptions(): {date: number, month: number, year: number, description: string}[] {
   const dates: {date: number, month: number, year: number, description: string}[] = [];
   const curDate: Date = new Date();
-  curDate.setDate(curDate.getDate() + 3);
+  curDate.setDate(curDate.getDate() + 2);
   
   let day: string;
   let month: string;
@@ -65,7 +65,7 @@ export function generateDateOptions(): {date: number, month: number, year: numbe
   return dates;
 }
 
-export function generateTimeOptions(): string[] {
+function generateTimeOptions(): string[] {
   const times = [];
   let time = 8;
   let hourString: string;
@@ -77,3 +77,5 @@ export function generateTimeOptions(): string[] {
   }
   return times;
 }
+
+export const timeOptions: string[] = generateTimeOptions();
