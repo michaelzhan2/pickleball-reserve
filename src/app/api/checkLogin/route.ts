@@ -4,9 +4,6 @@ import { delay } from "@/utils/delay";
 import puppeteer from "puppeteer";
 
 
-const valid: string[][] = [];
-
-
 export async function POST(request: Request) {
   /******************************************
    * Check login credentials
@@ -18,9 +15,6 @@ export async function POST(request: Request) {
   const body: LoginInfo = await request.json();
   const { username, encryptedPassword } = body;
   const password = CryptoJS.AES.decrypt(encryptedPassword, process.env.NEXT_PUBLIC_CRYPTO_KEY || '').toString(CryptoJS.enc.Utf8);
-  if (valid.includes([username, encryptedPassword])) {
-    return new Response(responseBody, { status: responseStatus });
-  }
 
   const browser = await puppeteer.launch({
     headless: 'new',
@@ -44,7 +38,7 @@ export async function POST(request: Request) {
     page.on('dialog', async dialog => {
       responseBody = dialog.message();
       responseStatus = 403;
-      console.log(dialog.message());
+      console.log(`[login] Failed login for ${username} with error ${responseBody}`);
       await dialog.dismiss();
     })
 
@@ -55,11 +49,11 @@ export async function POST(request: Request) {
 
     // logout
     await page.goto('https://secure.rec1.com/TX/up-tx/account/logout');
-    valid.push([username, encryptedPassword]);
+    console.log(`[login] Successful login for ${username}`);
   } catch (e: any) {
     if (responseStatus === 200) {
       responseBody = e.message;
-      console.log(e.message)
+      console.log(`[login] Failed login for ${username} with error ${e.message}`);
       responseStatus = 500;
     }
   } finally {

@@ -58,7 +58,10 @@ export async function POST(request: Request) {
     })
   }
 
-  let pattern = `15 0 6 ${targetDate.getDate()} ${targetDate.getMonth() + 1} *`;
+  // let pattern = `15 0 6 ${targetDate.getDate()} ${targetDate.getMonth() + 1} *`;
+  let test = new Date();
+  test.setSeconds(test.getSeconds() + 5);
+  let pattern = `${test.getSeconds()} ${test.getMinutes()} ${test.getHours()} ${test.getDate()} ${test.getMonth() + 1} *`;
   jobs[id] = new CronJob(pattern, wrapper, null, true, 'America/Chicago');
   scheduledDates.push(shortId);
 

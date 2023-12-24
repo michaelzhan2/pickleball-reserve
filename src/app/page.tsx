@@ -3,6 +3,7 @@
 
 import CryptoJS from 'crypto-js';
 import { useState, useEffect } from 'react';
+import Loading from '@/components/loading';
 import { generateDateOptions, timeOptions, idToDescription } from '@/utils/dateTime'
 import { PuppeteerInfo, LoginInfo } from '@/types/api'
 
@@ -17,6 +18,10 @@ export default function Home() {
   
   async function loadIds() {
     const res: Response = await fetch('/api/schedule');
+    if (!res.ok) {
+      alert('Failed to load jobs');
+      return;
+    }
     const data: string[] = await res.json();
     setIds(data);
   }
@@ -27,6 +32,7 @@ export default function Home() {
 
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
+    setLoading(true);
     e.preventDefault();
     let username: string = (e.target as HTMLFormElement).username.value;
     let password: string = (e.target as HTMLFormElement).password.value;
@@ -51,8 +57,10 @@ export default function Home() {
       },
       body: JSON.stringify(loginInfo)
     })
+    const loginCheckData = await loginCheckRes.text();
     if (!loginCheckRes.ok) {
-      alert('Login failed')
+      alert(`Login failed.\n${loginCheckData}`)
+      setLoading(false);
       return;
     } else {
       console.log(`Login successful for ${username}`)
@@ -79,13 +87,16 @@ export default function Home() {
     })
     if (scheduleRes.status === 403) {
       alert(`Job already scheduled for ${dateOptions[dateIdx].description}`)
+      setLoading(false);
       return;
     } else if (!scheduleRes.ok) {
-      alert('Scheduling failed');
+      alert(`Scheduling failed with error code ${scheduleRes.status}`);
+      setLoading(false);
       return;
     }
 
     await loadIds();
+    setLoading(false);
   }
 
   const deleteJob = async (e: React.MouseEvent<HTMLButtonElement>): Promise<void> => {
@@ -98,7 +109,7 @@ export default function Home() {
       body: JSON.stringify({ id: id })
     })
     if (!deleteRes.ok) {
-      alert('Delete failed');
+      alert(`Delete on job ${id} failed with error code ${deleteRes.status}`);
       return;
     }
     await loadIds();
@@ -114,9 +125,13 @@ export default function Home() {
 
   return (
     <>
+      <Loading loading={loading} />
+      <div>
+        <h1 className='text-3xl font-bold text-center mt-12 mb-8'>Court Scheduler</h1>
+      </div>
       {!authenticated ? (
         <>
-          <div className='h-screen w-screen flex justify-center items-center text-lg'>
+          <div className='w-screen flex justify-center items-center text-lg mt-36'>
             <form onSubmit={handleAuth} className='flex flex-col justify-center items-start'>
               <label htmlFor="authPassword" className='font-bold mb-1'>Enter password:</label>
               <input type="password" name="authPassword" placeholder="Password" className='border border-black shadow-md rounded-md px-3 py-2 mb-3' />
@@ -125,50 +140,55 @@ export default function Home() {
           </div>
         </>
       ) : (
-        <div className='w-screen flex flex-wrap justify-center items-center'>
-          <div>
-            <form onSubmit={handleSubmit} className="flex flex-col">
-              <label htmlFor="username">Username</label>
-              <input type="text" name="username" placeholder="Username" className="border border-black" />
-              <label htmlFor="password">Password</label>
-              <input type="password" name="password" placeholder="Password" className="border border-black" />
-              <label htmlFor="date">Date</label>
-              <select name="date" className="border border-black">
-                {dateOptions.map((dateOption, idx) => (
-                  <option key={idx} value={idx}>{dateOption.description}</option>
-                ))}
-              </select>
-              <label htmlFor="startTime">Start Time</label>
-              <select name="startTime" defaultValue={23} className="border border-black">
-                {timeOptions.map((timeOption, idx) => (
-                  <option key={idx} value={idx}>{timeOption}</option>
-                ))}
-              </select>
-              <label htmlFor="endTime">End Time</label>
-              <select name="endTime" defaultValue={27} className="border border-black">
-                {timeOptions.map((timeOption, idx) => (
-                  <option key={idx} value={idx}>{timeOption}</option>
-                ))}
-              </select>
-              <label htmlFor='courtOrder'>Court Order</label>
-              <input type='text' name='courtOrder' defaultValue={'6,4,3,1,5,2'} placeholder='Comma-separated order (e.g. 1,2,3)' className='border border-black'/>
-              <button type="submit" className="border border-black bg-green-300">Submit</button>
-            </form>
-          </div>
-
-          <hr className='block md:hidden h-px border border-gray-400 my-3 w-5/6'></hr>
-
-          <div>
-            <div>
-              Current jobs
+        <div className='w-screen flex justify-center items-center text-lg'>
+          <div className='w-full md:w-5/6 flex flex-wrap justify-around'>
+            <div className='w-5/6 md:w-1/4'>
+              <form onSubmit={handleSubmit} className="flex flex-col">
+                <label htmlFor="username" className='mb-1'>Username</label>
+                <input type="text" name="username" placeholder="Username" className="border border-black shadow-md rounded-md px-3 py-2 mb-3" />
+                <label htmlFor="password" className='mb-1'>Password</label>
+                <input type="password" name="password" placeholder="Password" className="border border-black shadow-md rounded-md px-3 py-2 mb-3" />
+                <label htmlFor="date" className='mb-1'>Date</label>
+                <select name="date" className="border border-black shadow-md rounded-md px-3 py-2 mb-3">
+                  {dateOptions.map((dateOption, idx) => (
+                    <option key={idx} value={idx}>{dateOption.description}</option>
+                  ))}
+                </select>
+                <label htmlFor="startTime" className='mb-1'>Start Time</label>
+                <select name="startTime" defaultValue={23} className="border border-black shadow-md rounded-md px-3 py-2 mb-3">
+                  {timeOptions.map((timeOption, idx) => (
+                    <option key={idx} value={idx}>{timeOption}</option>
+                  ))}
+                </select>
+                <label htmlFor="endTime" className='mb-1'>End Time</label>
+                <select name="endTime" defaultValue={27} className="border border-black shadow-md rounded-md px-3 py-2 mb-3">
+                  {timeOptions.map((timeOption, idx) => (
+                    <option key={idx} value={idx}>{timeOption}</option>
+                  ))}
+                </select>
+                <label htmlFor='courtOrder' className='mb-1'>Court Order</label>
+                <input type='text' name='courtOrder' defaultValue={'6,4,3,1,5,2'} placeholder='Comma-separated order (e.g. 1,2,3)' className='border border-black shadow-md rounded-md px-3 py-2 mb-3'/>
+                <button type="submit" className="w-2/3 m-auto bg-green-600 shadow-md rounded-md px-3 py-2 text-white transition-transform hover:-translate-y-1 mt-4">Submit</button>
+              </form>
             </div>
-            <div>
-              {ids.map((id, idx) => (
-                <div key={idx}>
-                  {idToDescription(id)}
-                  <button type="button" onClick={deleteJob} name={id} className='border border-black bg-red-200'>Cancel</button>
-                </div>
-              ))}
+
+            <hr className='block md:hidden h-px border border-gray-400 my-3 w-5/6'></hr>
+
+            <div className='w-5/6 md:w-1/2'>
+              <div className='text-center font-bold text-2xl mb-3'>
+                Current jobs
+              </div>
+              <div>
+                {ids.map((id, idx) => (
+                  <div key={idx} className='flex flex-wrap justify-center md:justify-between items-center'>
+                    <div className='mb-3'>
+                      {idToDescription(id)}
+                    </div>
+                    <button type="button" onClick={deleteJob} name={id} className='bg-red-600 shadow-md rounded-md px-3 py-2 text-white transition-transform hover:-translate-y-1'>Cancel</button>
+                    {idx !== ids.length - 1 && <hr className='w-full h-px border border-gray-400 my-3'></hr>}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
