@@ -145,9 +145,9 @@ export default function Home() {
             <div className='w-5/6 md:w-1/4'>
               <form onSubmit={handleSubmit} className="flex flex-col">
                 <label htmlFor="username" className='mb-1'>Username</label>
-                <input type="text" name="username" placeholder="Username" className="border border-black shadow-md rounded-md px-3 py-2 mb-3" />
+                <input type="text" name="username" id="username" autoComplete="username" placeholder="Username" className="border border-black shadow-md rounded-md px-3 py-2 mb-3" />
                 <label htmlFor="password" className='mb-1'>Password</label>
-                <input type="password" name="password" placeholder="Password" className="border border-black shadow-md rounded-md px-3 py-2 mb-3" />
+                <input type="password" name="password" id="password" autoComplete='current-password' placeholder="Password" className="border border-black shadow-md rounded-md px-3 py-2 mb-3" />
                 <label htmlFor="date" className='mb-1'>Date</label>
                 <select name="date" className="border border-black shadow-md rounded-md px-3 py-2 mb-3">
                   {dateOptions.map((dateOption, idx) => (

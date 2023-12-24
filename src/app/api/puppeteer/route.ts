@@ -153,16 +153,16 @@ export async function POST(request: Request) {
       if (done) break;
     }
     // =========== end main loop ===================
-
+//
     // add to cart and checkout
     await delay(1000);
-    await page.waitForSelector('[id^=popover] > div.popover-content > div > div.ui-col-7.ui-offset-lg > form > div.text-left > div > button').then((el) => el?.evaluate((e) => e.click()));
+    await page.waitForSelector('button[data-action=addToCart]').then((el) => el?.evaluate((e) => e.click()));
     await delay(1000);
-    await page.waitForSelector('body > div.rec1-catalog-cart > div > div.cart-contents-total > table > tbody > tr:nth-child(2) > td > a').then((el) => el?.evaluate((e) => e.click()));
+    await page.waitForSelector('a.btn.cart-checkout-button').then((el) => el?.evaluate((e) => e.click()));
     await delay(1000);
-    await page.waitForSelector('#rec1-public-wrapper > div.ui-page > div:nth-child(8) > div.ui-control-panel-right.pull-right > div.text-right.ui-inset > button').then((el) => el?.evaluate((e) => e.click()));
+    await page.waitForSelector('button[type=submit].checkout-continue-button').then((el) => el?.evaluate((e) => e.click()));
     await delay(1000);
-    await page.waitForSelector('#rec1-public-wrapper > div.ui-page > div:nth-child(8) > div.ui-control-panel-right.pull-right > div.text-right.ui-inset > button').then((el) => el?.evaluate((e) => e.click()));
+    await page.waitForSelector('button[type=submit].checkout-continue-button').then((el) => el?.evaluate((e) => e.click()));
     await delay(5000);
 
     console.log('[puppeteer] Reservation successful')
