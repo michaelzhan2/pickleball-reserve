@@ -156,7 +156,7 @@ export async function POST(request: Request) {
 //
     // add to cart and checkout
     await delay(1000);
-    await page.waitForSelector('[id^=popover] > div.popover-content > div > div.ui-col-7.ui-offset-lg > form > div.text-left > div > button').then((el) => el?.evaluate((e) => e.click()));
+    await page.waitForSelector('button[data-action=addToCart]').then((el) => el?.evaluate((e) => e.click()));
     await delay(1000);
     await page.waitForSelector('a.btn.cart-checkout-button').then((el) => el?.evaluate((e) => e.click()));
     await delay(1000);

@@ -55,6 +55,7 @@ export async function POST(request: Request) {
       console.log(`[cron] Finished and deleting job for ${id}`)
       jobs[id].stop();
       delete jobs[id];
+      scheduledDates.splice(scheduledDates.indexOf(shortId), 1);
     })
   }
 
