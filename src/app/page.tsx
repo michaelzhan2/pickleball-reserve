@@ -140,7 +140,7 @@ export default function Home() {
           </div>
         </>
       ) : (
-        <div className='w-screen flex justify-center items-center text-lg'>
+        <div className='w-screen flex justify-center items-center text-lg mb-3'>
           <div className='w-full md:w-5/6 flex flex-wrap justify-around'>
             <div className='w-5/6 md:w-1/4'>
               <form onSubmit={handleSubmit} className="flex flex-col">
