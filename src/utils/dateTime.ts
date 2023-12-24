@@ -43,8 +43,7 @@ export const monthToNum: {[key: string]: number} = {
 export function generateDateOptions(): {date: number, month: number, year: number, description: string}[] {
   const dates: {date: number, month: number, year: number, description: string}[] = [];
   const curDate: Date = new Date();
-  curDate.setDate(curDate.getDate() + 1);
-  // TODO: change to + 3
+  curDate.setDate(curDate.getDate() + 3);
   
   let day: string;
   let month: string;
