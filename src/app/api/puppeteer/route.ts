@@ -58,7 +58,7 @@ export async function POST(request: Request) {
     for (let window = 3; window > 0; window--) {
       for (let c = 0; c < courtOrder.length; c++) {
         court = courtOrder[c];
-        console.log(`Trying court ${court}`);
+        console.log(`[puppeteer] Trying court ${court}`);
 
         // select court
         await page.waitForSelector(`#rec1-public-wrapper > div.ui-page > div.rec1-catalog.rec1-catalog-container.clearfix > div.rec1-catalog-items > div.rec1-catalog-items-inner.clearfix > div.rec1-catalog-group.selected.collapsible > div.rec1-catalog-group-maps > div.facility-grid > div.interactive-grid-container > div.interactive-grid-inner > table > tr:nth-child(${court + 2}) > td:nth-child(2) > div`).then((el) => el?.evaluate((e) => e.click()));
@@ -106,7 +106,7 @@ export async function POST(request: Request) {
           for (let j = 0; j < startTimeOptions.length; j++) {
             if (startTimeOptions[j][0] === startTimeString) {
               await startTimeDropdown.select((startTimeOptions as string[][])[j][1]);
-              console.log(`Selected start ${startTimeOptions[j][0]}`)
+              console.log(`[puppeteer] Selected start ${startTimeOptions[j][0]}`)
               startSelected = true;
               break;
             }
@@ -134,7 +134,7 @@ export async function POST(request: Request) {
               await children[j].evaluate((e) => e.click());
   
               // await endTimeDropdown?.waitForSelector('div')
-              console.log(`Selected end ${endTimeOptions[j]}`)
+              console.log(`[puppeteer] Selected end ${endTimeOptions[j]}`)
               done = true;
               break;
             }
@@ -142,7 +142,7 @@ export async function POST(request: Request) {
           if (done) {
             break;
           } else {
-            console.log(`End time ${endTimeString} not found`)
+            console.log(`[puppeteer] End time ${endTimeString} not found`)
           }
         }
         if (done) break;
@@ -165,10 +165,10 @@ export async function POST(request: Request) {
     await page.waitForSelector('#rec1-public-wrapper > div.ui-page > div:nth-child(8) > div.ui-control-panel-right.pull-right > div.text-right.ui-inset > button').then((el) => el?.evaluate((e) => e.click()));
     await delay(5000);
 
-    console.log('Reservation successful')
+    console.log('[puppeteer] Reservation successful')
   } catch (e: any) {
     responseBody = e.message;
-    console.log(e.message)
+    console.log(`[puppeteer] Error: ${responseBody}`)
     responseStatus = 500;
   } finally {
     await browser.close();

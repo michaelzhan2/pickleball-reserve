@@ -3,21 +3,19 @@
 
 import CryptoJS from 'crypto-js';
 import { useState, useEffect } from 'react';
-import { generateDateOptions, timeOptions } from '@/utils/dateTime'
+import { generateDateOptions, timeOptions, idToDescription } from '@/utils/dateTime'
 import { PuppeteerInfo, LoginInfo } from '@/types/api'
 
 
-const dateOptions = generateDateOptions();
-
-
+const dateOptions: { date: number, month: number, year: number, description: string }[] = generateDateOptions();
 
 
 export default function Home() {
   const [ids, setIds] = useState<string[]>([]);
   
   async function loadIds() {
-    const res = await fetch('/api/schedule');
-    const data = await res.json();
+    const res: Response = await fetch('/api/schedule');
+    const data: string[] = await res.json();
     setIds(data);
   }
 
@@ -26,17 +24,17 @@ export default function Home() {
   }, [])
 
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
-    let username = (e.target as HTMLFormElement).username.value;
-    let password = (e.target as HTMLFormElement).password.value;
-    let dateIdx = (e.target as HTMLFormElement).date.value;
-    let date = dateOptions[dateIdx].date;
-    let month = dateOptions[dateIdx].month;
-    let year = dateOptions[dateIdx].year;
+    let username: string = (e.target as HTMLFormElement).username.value;
+    let password: string = (e.target as HTMLFormElement).password.value;
+    let dateIdx: number = parseFloat((e.target as HTMLFormElement).date.value);
+    let date: number = dateOptions[dateIdx].date;
+    let month: number = dateOptions[dateIdx].month;
+    let year: number = dateOptions[dateIdx].year;
     let startTime: number = parseFloat((e.target as HTMLFormElement).startTime.value);
     let endTime: number = parseFloat((e.target as HTMLFormElement).endTime.value);
-    let courtOrder = [3, 4, 1, 6, 2, 5];
+    let courtOrder: number[] = (e.target as HTMLFormElement).courtOrder.value.split(',').map((court: string) => parseFloat(court));
     let encryptedPassword: string = CryptoJS.AES.encrypt(password, process.env.NEXT_PUBLIC_CRYPTO_KEY || '').toString();
     
     const loginInfo: LoginInfo = {
@@ -44,14 +42,14 @@ export default function Home() {
       encryptedPassword: encryptedPassword
     }
 
-    const loginCheck = await fetch('/api/checkLogin', {
+    const loginCheckRes: Response = await fetch('/api/checkLogin', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(loginInfo)
     })
-    if (!loginCheck.ok) {
+    if (!loginCheckRes.ok) {
       alert('Login failed')
       return;
     } else {
@@ -69,7 +67,7 @@ export default function Home() {
       courtOrder: courtOrder
     }
 
-    const scheduleRes = await fetch('/api/schedule', {
+    const scheduleRes: Response = await fetch('/api/schedule', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -77,11 +75,30 @@ export default function Home() {
       body: JSON.stringify(puppeteerInfo),
       cache: 'no-cache'
     })
-    if (!scheduleRes.ok) {
+    if (scheduleRes.status === 403) {
+      alert(`Job already scheduled for ${dateOptions[dateIdx].description}`)
+      return;
+    } else if (!scheduleRes.ok) {
       alert('Scheduling failed');
       return;
     }
 
+    await loadIds();
+  }
+
+  const deleteJob = async (e: React.MouseEvent<HTMLButtonElement>): Promise<void> => {
+    let id: string = (e.currentTarget as HTMLButtonElement).name;
+    const deleteRes: Response = await fetch(`/api/schedule/`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ id: id })
+    })
+    if (!deleteRes.ok) {
+      alert('Delete failed');
+      return;
+    }
     await loadIds();
   }
 
@@ -111,11 +128,10 @@ export default function Home() {
               <option key={idx} value={idx}>{timeOption}</option>
             ))}
           </select>
+          <label htmlFor='courtOrder'>Court Order</label>
+          <input type='text' name='courtOrder' defaultValue={'6,4,3,1,5,2'} placeholder='Comma-separated order (e.g. 1,2,3)' className='border border-black'/>
           <button type="submit" className="border border-black bg-green-300">Submit</button>
         </form>
-      </div>
-      <div>
-        <button type="button" className='border border-black bg-blue-200'>Test</button>
       </div>
       <div>
         <div>
@@ -124,8 +140,9 @@ export default function Home() {
         <div>
           {ids.map((id, idx) => (
             <div key={idx}>
-              {id}
-            </div>
+              {idToDescription(id)}
+              <button type="button" onClick={deleteJob} name={id} className='border border-black bg-red-200'>Cancel</button>
+            </div>                
           ))}
         </div>
       </div>

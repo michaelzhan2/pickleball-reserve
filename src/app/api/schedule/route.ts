@@ -1,7 +1,9 @@
 import { CronJob } from 'cron';
 import type { PuppeteerInfo } from '@/types/api';
 
+
 const jobs: {[key: string]: CronJob} = {};
+const scheduledDates: string[] = [];
 
 
 export async function GET() {
@@ -26,6 +28,13 @@ export async function POST(request: Request) {
   const body: PuppeteerInfo = await request.json();
   const { username, date, month, year, startTime, endTime } = body;
   const id = `${username}-${date}-${month}-${year}-${startTime}-${endTime}`;
+  const shortId = `${username}-${date}-${month}-${year}`;
+  if (scheduledDates.includes(shortId)) {
+    responseBody = 'Already scheduled for this date';
+    responseStatus = 403;
+    return new Response(responseBody, { status: responseStatus });
+  }
+
   const targetDate: Date = new Date(year, month, date);
   targetDate.setDate(targetDate.getDate() - 2);
 
@@ -43,14 +52,18 @@ export async function POST(request: Request) {
         console.log(`[cron] Failed job for ${id}`);
         console.log(res.text());
       }
-
+      console.log(`[cron] Finished and deleting job for ${id}`)
       jobs[id].stop();
       delete jobs[id];
     })
   }
 
-  let pattern = `15 0 6 ${targetDate.getDate()} ${targetDate.getMonth()} *`;
+  // let pattern = `15 0 6 ${targetDate.getDate()} ${targetDate.getMonth()} *`;
+  let test = new Date();
+  test.setSeconds(test.getSeconds() + 5);
+  let pattern = `${test.getSeconds()} ${test.getMinutes()} ${test.getHours()} ${test.getDate()} ${test.getMonth() + 1} *`;
   jobs[id] = new CronJob(pattern, wrapper, null, true, 'America/Chicago');
+  scheduledDates.push(shortId);
 
   console.log(`[cron] Scheduled job for ${id} at ${pattern}`)
   return new Response(responseBody, { status: responseStatus });
@@ -63,9 +76,12 @@ export async function DELETE(request: Request) {
 
   const body = await request.json();
   const { id } = body;
+  const shortId: string = id.split('-').slice(0, 4).join('-');
   if (jobs[id]) {
     jobs[id].stop();
     delete jobs[id];
+    scheduledDates.splice(scheduledDates.indexOf(shortId), 1);
+    console.log(`[cron] Deleted job for ${id}`)
   }
   return new Response(responseBody, { status: responseStatus });
 }

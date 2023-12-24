@@ -43,7 +43,7 @@ export const monthToNum: {[key: string]: number} = {
 export function generateDateOptions(): {date: number, month: number, year: number, description: string}[] {
   const dates: {date: number, month: number, year: number, description: string}[] = [];
   const curDate: Date = new Date();
-  curDate.setDate(curDate.getDate() + 3);
+  curDate.setDate(curDate.getDate() + 0);
   
   let day: string;
   let month: string;
@@ -76,6 +76,18 @@ function generateTimeOptions(): string[] {
     time++;
   }
   return times;
+}
+
+export function idToDescription(id: string): string {
+  const [username, date, month, year, startTime, endTime] = id.split('-');
+  const dateObj = new Date(parseInt(year), parseInt(month), parseInt(date));
+  const startTimeString: string = timeOptions[parseInt(startTime)];
+  const endTimeString: string = timeOptions[parseInt(endTime)];
+  const day: string = numToDay[dateObj.getDay()];
+  const monthString: string = numToMonth[dateObj.getMonth()];
+  const dateNumber: number = dateObj.getDate();
+  const yearNumber: number = dateObj.getFullYear();
+  return `${day}, ${monthString} ${dateNumber}, ${yearNumber} from ${startTimeString} to ${endTimeString}`;
 }
 
 export const timeOptions: string[] = generateTimeOptions();

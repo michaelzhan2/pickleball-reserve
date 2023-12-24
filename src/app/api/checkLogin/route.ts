@@ -1,6 +1,10 @@
 import CryptoJS from "crypto-js";
 import { LoginInfo } from "@/types/api";
+import { delay } from "@/utils/delay";
 import puppeteer from "puppeteer";
+
+
+const valid: string[][] = [];
 
 
 export async function POST(request: Request) {
@@ -14,6 +18,9 @@ export async function POST(request: Request) {
   const body: LoginInfo = await request.json();
   const { username, encryptedPassword } = body;
   const password = CryptoJS.AES.decrypt(encryptedPassword, process.env.NEXT_PUBLIC_CRYPTO_KEY || '').toString(CryptoJS.enc.Utf8);
+  if (valid.includes([username, encryptedPassword])) {
+    return new Response(responseBody, { status: responseStatus });
+  }
 
   const browser = await puppeteer.launch({
     headless: 'new',
@@ -41,13 +48,14 @@ export async function POST(request: Request) {
       await dialog.dismiss();
     })
 
-    await page.waitForNetworkIdle();
+    await delay(1000);
     if (loginFailed) {
       throw new Error(responseBody);
     }
 
     // logout
     await page.goto('https://secure.rec1.com/TX/up-tx/account/logout');
+    valid.push([username, encryptedPassword]);
   } catch (e: any) {
     if (responseStatus === 200) {
       responseBody = e.message;
