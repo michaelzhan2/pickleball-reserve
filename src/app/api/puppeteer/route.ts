@@ -14,7 +14,8 @@ export async function POST(request: Request) {
   const password = CryptoJS.AES.decrypt(encryptedPassword, process.env.NEXT_PUBLIC_CRYPTO_KEY || '').toString(CryptoJS.enc.Utf8);
 
   const browser = await puppeteer.launch({
-    headless: true,
+    // headless: true,
+    headless: 'new',
     //DEBUG
     // headless: false,
     args: [
