@@ -14,9 +14,9 @@ export async function POST(request: Request) {
   const password = CryptoJS.AES.decrypt(encryptedPassword, process.env.NEXT_PUBLIC_CRYPTO_KEY || '').toString(CryptoJS.enc.Utf8);
 
   const browser = await puppeteer.launch({
-    headless: 'new',
+    // headless: 'new',
     //DEBUG
-    // headless: false,
+    headless: false,
     args: [
       '--no-sandbox',
       '--disable-setuid-sandbox',
@@ -148,7 +148,7 @@ export async function POST(request: Request) {
               // await children[j].evaluate((e) => e.click());
   
               // await endTimeDropdown?.waitForSelector('div')
-              console.log(`[puppeteer] Selected end ${endTimeOptions[j]}`)
+              console.log(`[puppeteer] Selected end ${endTimeOptions[j][0]}`)
               done = true;
               break;
             }

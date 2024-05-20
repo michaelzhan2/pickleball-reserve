@@ -15,8 +15,8 @@ export default function Home() {
   const [ids, setIds] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   // DEBUG
-  const [authenticated, setAuthenticated] = useState<boolean>(true);
-  // const [authenticated, setAuthenticated] = useState<boolean>(false);
+  // const [authenticated, setAuthenticated] = useState<boolean>(true);
+  const [authenticated, setAuthenticated] = useState<boolean>(false);
   
   async function loadIds() {
     const res: Response = await fetch('/api/schedule');
@@ -82,19 +82,19 @@ export default function Home() {
     }
 
     // DEBUG
-    const sendImmediatelyRes: Response = await fetch('/api/puppeteer', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(puppeteerInfo),
-      cache: 'no-cache'
-    });
-    if (!sendImmediatelyRes.ok) {
-      alert(`Puppeteer failed with error code ${sendImmediatelyRes.status}`);
-      setLoading(false);
-      return;
-    }
+    // const sendImmediatelyRes: Response = await fetch('/api/puppeteer', {
+    //   method: 'POST',
+    //   headers: {
+    //     'Content-Type': 'application/json'
+    //   },
+    //   body: JSON.stringify(puppeteerInfo),
+    //   cache: 'no-cache'
+    // });
+    // if (!sendImmediatelyRes.ok) {
+    //   alert(`Puppeteer failed with error code ${sendImmediatelyRes.status}`);
+    //   setLoading(false);
+    //   return;
+    // }
 
     const scheduleRes: Response = await fetch('/api/schedule', {
       method: 'POST',
