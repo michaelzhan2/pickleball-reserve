@@ -28,7 +28,7 @@ export async function POST(request: Request) {
     // try login
     const page = await browser.newPage();
     await page.goto('https://secure.rec1.com/TX/up-tx/catalog');
-    await page.waitForSelector('#rec1-public-navigation-bar > div.col-xs-5 > div > div > a').then((el) => el?.evaluate((e) => e.click()));
+    await page.waitForSelector('a.rec1-login-trigger').then((el) => el?.evaluate((e) => e.click()));
     await page.waitForSelector('#login-username', {hidden: true, visible: true}).then((el) => el?.type(username));
     await page.waitForSelector('#login-password', {hidden: true, visible: true}).then((el) => el?.type(password));
     await page.waitForSelector('#rec1-public-navigation-bar > div.col-xs-5 > div > div > ul > li:nth-child(1) > form > div:nth-child(4) > div > button', {hidden: true, visible: true}).then((el) => el?.evaluate((e) => e.click()));
@@ -39,6 +39,7 @@ export async function POST(request: Request) {
       responseBody = dialog.message();
       responseStatus = 403;
       console.log(`[login] Failed login for ${username} with error ${responseBody}`);
+      loginFailed = true;
       await dialog.dismiss();
     })
 

@@ -14,7 +14,9 @@ const dateOptions: { date: number, month: number, year: number, description: str
 export default function Home() {
   const [ids, setIds] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
-  const [authenticated, setAuthenticated] = useState<boolean>(false);
+  // DEBUG
+  const [authenticated, setAuthenticated] = useState<boolean>(true);
+  // const [authenticated, setAuthenticated] = useState<boolean>(false);
   
   async function loadIds() {
     const res: Response = await fetch('/api/schedule');
@@ -34,8 +36,10 @@ export default function Home() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
     setLoading(true);
     e.preventDefault();
+
     let username: string = (e.target as HTMLFormElement).username.value;
     let password: string = (e.target as HTMLFormElement).password.value;
+
     let dateIdx: number = parseFloat((e.target as HTMLFormElement).date.value);
     let date: number = dateOptions[dateIdx].date;
     let month: number = dateOptions[dateIdx].month;
@@ -75,6 +79,21 @@ export default function Home() {
       startTime: startTime,
       endTime: endTime,
       courtOrder: courtOrder
+    }
+
+    // DEBUG
+    const sendImmediatelyRes: Response = await fetch('/api/puppeteer', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(puppeteerInfo),
+      cache: 'no-cache'
+    });
+    if (!sendImmediatelyRes.ok) {
+      alert(`Puppeteer failed with error code ${sendImmediatelyRes.status}`);
+      setLoading(false);
+      return;
     }
 
     const scheduleRes: Response = await fetch('/api/schedule', {
