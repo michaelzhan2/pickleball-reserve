@@ -14,14 +14,13 @@ export async function POST(request: Request) {
   const password = CryptoJS.AES.decrypt(encryptedPassword, process.env.NEXT_PUBLIC_CRYPTO_KEY || '').toString(CryptoJS.enc.Utf8);
 
   const browser = await puppeteer.launch({
-    // headless: 'new',
     headless: true,
     //DEBUG
     // headless: false,
-    // args: [
-    //   '--no-sandbox',
-    //   '--disable-setuid-sandbox',
-    // ],
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+    ],
   });
 
   try {
