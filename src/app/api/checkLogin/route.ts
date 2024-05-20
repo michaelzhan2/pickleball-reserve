@@ -48,8 +48,8 @@ export async function POST(request: Request) {
       throw new Error(responseBody);
     }
 
-    // logout
-    await page.goto('https://secure.rec1.com/TX/up-tx/account/logout');
+    // // logout
+    // await page.goto('https://secure.rec1.com/TX/up-tx/account/logout');
   } catch (e: any) {
     if (responseStatus === 200) {
       responseBody = e.message;
