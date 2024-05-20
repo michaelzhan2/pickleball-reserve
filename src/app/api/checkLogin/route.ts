@@ -17,11 +17,12 @@ export async function POST(request: Request) {
   const password = CryptoJS.AES.decrypt(encryptedPassword, process.env.NEXT_PUBLIC_CRYPTO_KEY || '').toString(CryptoJS.enc.Utf8);
 
   const browser = await puppeteer.launch({
-    headless: 'new',
-    args: [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-    ],
+    // headless: 'new',
+    // args: [
+    //   '--no-sandbox',
+    //   '--disable-setuid-sandbox',
+    // ],
+    headless: true,
   });
 
   try {
@@ -50,7 +51,6 @@ export async function POST(request: Request) {
 
     // logout
     await page.goto('https://secure.rec1.com/TX/up-tx/account/logout');
-    console.log(`[login] Successful login for ${username}`);
   } catch (e: any) {
     if (responseStatus === 200) {
       responseBody = e.message;

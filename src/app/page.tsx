@@ -63,11 +63,11 @@ export default function Home() {
     })
     const loginCheckData = await loginCheckRes.text();
     if (!loginCheckRes.ok) {
-      alert(`Login failed.\n${loginCheckData}`)
+      alert(`[login] Login failed.\n${loginCheckData}`)
       setLoading(false);
       return;
     } else {
-      console.log(`Login successful for ${username}`)
+      console.log(`[login] Successful login for ${username}`);
     }
     
     const puppeteerInfo: PuppeteerInfo = {

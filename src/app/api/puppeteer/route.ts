@@ -15,12 +15,13 @@ export async function POST(request: Request) {
 
   const browser = await puppeteer.launch({
     // headless: 'new',
+    headless: true,
     //DEBUG
-    headless: false,
-    args: [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-    ],
+    // headless: false,
+    // args: [
+    //   '--no-sandbox',
+    //   '--disable-setuid-sandbox',
+    // ],
   });
 
   try {
