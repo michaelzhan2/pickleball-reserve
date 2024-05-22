@@ -17,6 +17,7 @@ export default function Home() {
   // DEBUG
   // const [authenticated, setAuthenticated] = useState<boolean>(true);
   const [authenticated, setAuthenticated] = useState<boolean>(false);
+  const [orderString, setOrderString] = useState<string>('');
   
   async function loadIds() {
     const res: Response = await fetch('/api/schedule');
@@ -28,9 +29,24 @@ export default function Home() {
     setIds(data);
   }
 
+  async function loadOrder() {
+    const res: Response = await fetch('/api/courtOrder');
+    if (!res.ok) {
+      alert('Failed to load court order');
+      return;
+    }
+    const data: string = await res.text();
+    setOrderString(data);
+  }
+
   useEffect(() => {
     loadIds();
+    loadOrder();
   }, [])
+
+  const handleOrderChange = (e: React.FormEvent<HTMLInputElement>): void => {
+    setOrderString((e.target as HTMLInputElement).value);
+  }
 
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
@@ -48,6 +64,19 @@ export default function Home() {
     let endTime: number = parseFloat((e.target as HTMLFormElement).endTime.value);
     let courtOrder: number[] = (e.target as HTMLFormElement).courtOrder.value.split(',').map((court: string) => parseFloat(court));
     let encryptedPassword: string = CryptoJS.AES.encrypt(password, process.env.NEXT_PUBLIC_CRYPTO_KEY || '').toString();
+
+    const orderUpdateRes:  Response = await fetch('/api/courtOrder', {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({order: orderString})
+    })
+    if (!orderUpdateRes.ok) {
+      alert(`Failed to update court order with error code ${orderUpdateRes.status}`);
+      setLoading(false);
+      return;
+    }
     
     const loginInfo: LoginInfo = {
       username: username,
@@ -186,7 +215,7 @@ export default function Home() {
                   ))}
                 </select>
                 <label htmlFor='courtOrder' className='mb-1'>Court Order</label>
-                <input type='text' name='courtOrder' defaultValue={'6,4,3,1,5,2'} placeholder='Comma-separated order (e.g. 1,2,3)' className='border border-black shadow-md rounded-md px-3 py-2 mb-3'/>
+                <input type='text' name='courtOrder' defaultValue={orderString} onChange={handleOrderChange} placeholder='Comma-separated order (e.g. 1,2,3)' className='border border-black shadow-md rounded-md px-3 py-2 mb-3'/>
                 <button type="submit" className="w-2/3 m-auto bg-green-600 shadow-md rounded-md px-3 py-2 text-white transition-transform hover:-translate-y-1 mt-4">Submit</button>
               </form>
             </div>
