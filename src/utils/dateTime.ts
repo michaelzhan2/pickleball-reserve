@@ -89,7 +89,7 @@ export function idToDescription(id: string): string {
   const monthString: string = numToMonth[dateObj.getMonth()];
   const dateNumber: number = dateObj.getDate();
   const yearNumber: number = dateObj.getFullYear();
-  return `${day}, ${monthString} ${dateNumber}, ${yearNumber} from ${startTimeString} to ${endTimeString}`;
+  return `${username}: ${day}, ${monthString} ${dateNumber}, ${yearNumber} from ${startTimeString} to ${endTimeString}`;
 }
 
 export const timeOptions: string[] = generateTimeOptions();
