@@ -1,5 +1,5 @@
 import CryptoJS from "crypto-js";
-import puppeteer, { ElementHandle } from "puppeteer";
+import puppeteer from "puppeteer";
 import { PuppeteerInfo } from "@/types/api";
 import { timeOptions } from "@/utils/dateTime";
 import { delay } from "@/utils/delay";
@@ -14,10 +14,7 @@ export async function POST(request: Request) {
   const password = CryptoJS.AES.decrypt(encryptedPassword, process.env.NEXT_PUBLIC_CRYPTO_KEY || '').toString(CryptoJS.enc.Utf8);
 
   const browser = await puppeteer.launch({
-    // headless: true,
     headless: 'new',
-    //DEBUG
-    // headless: false,
     args: [
       '--no-sandbox',
       '--disable-setuid-sandbox',
@@ -59,7 +56,7 @@ export async function POST(request: Request) {
     let startSelected;
     let children;
 
-    // select date DEBUG might be fix
+    // select date
     await page.waitForSelector('button.btn.interactive-grid-date-next').then((el) => el?.evaluate((e) => e.click()));
     await delay(500);
     await page.waitForSelector('button.btn.interactive-grid-date-next').then((el) => el?.evaluate((e) => e.click()));
@@ -69,43 +66,11 @@ export async function POST(request: Request) {
         court = courtOrder[c];
         console.log(`[puppeteer] Trying court ${court}`);
 
-
-        //DEBUG try
         await delay(500);
         await page.waitForSelector(`table.interactive-grid-table > tr:nth-child(${court + 2}) > td:nth-child(2)`).then((el) => el?.evaluate((e) => e.click()));
-        // // select court DEBUG
-        // await page.waitForSelector(`#rec1-public-wrapper > div.ui-page > div.rec1-catalog.rec1-catalog-container.clearfix > div.rec1-catalog-items > div.rec1-catalog-items-inner.clearfix > div.rec1-catalog-group.selected.collapsible > div.rec1-catalog-group-maps > div.facility-grid > div.interactive-grid-container > div.interactive-grid-inner > table > tr:nth-child(${court + 2}) > td:nth-child(2) > div`).then((el) => el?.evaluate((e) => e.click()));
-        
-        // DEBUG
-        // // select month, year, date
-        // await delay(1000);
-        // await page.select('[id^=rec1-catalog-reservation-date-] > div > div > div > select.ui-datepicker-month', `${month}`);
-        // await page.select('[id^=rec1-catalog-reservation-date-] > div > div > div > select.ui-datepicker-year', `${year}`);
-
-        // await delay(200);
-        // const dateTable = await page.waitForSelector('[id^=rec1-catalog-reservation-date-] > div > table > tbody');
-        // const dateRows = await dateTable?.$$('tr');
-
-        // if (!dateRows) throw new Error('Calendar date selection failed');
-
-        // dateFound = false;
-        // for (let i = 0; i < dateRows.length; i++) {
-        //   dateCells = await dateRows[i].$$('td');
-        //   for (let j = 0; j < dateCells.length; j++) {
-        //     dateCell = dateCells[j];
-        //     dateCellText = await dateCell.evaluate((e) => e.textContent);
-        //     if (dateCellText === `${date}`) {
-        //       dateFound = true;
-        //       await dateCell.evaluate((e) => e.click());
-        //       break;
-        //     }
-        //   }
-        //   if (dateFound) break;
-        // }
 
         await delay(500);
         startTimeDropdown = await page.waitForSelector('select.rec1-catalog-reservation-hours-from');
-        // startTimeDropdown = await page.waitForSelector('[id^=popover] > div.popover-content > div > div.ui-col-7.ui-offset-lg > form > div.reservation-hours > div > select.ui-selectmenu.rec1-catalog-reservation-hours-from.notranslate');
         if (!startTimeDropdown) throw new Error('Start time dropdown not found');
 
         startTimeOptions = await page.evaluate(select => {
@@ -129,9 +94,6 @@ export async function POST(request: Request) {
           if (!startSelected) continue;
 
           await delay(500);
-          // endTimeDropdownButton = await page.waitForSelector('[id^=popover] > div.popover-content > div > div.ui-col-7.ui-offset-lg > form > div.reservation-hours > div > div:nth-child(4)')
-          // await endTimeDropdownButton?.click();
-          // endTimeDropdown = await page.waitForSelector('body > div.selectmenu-items.notranslate.open > div.selectmenu-spacer-foreground');
           endTimeDropdown = await page.waitForSelector('select.rec1-catalog-reservation-hours-to');
           if (!endTimeDropdown) throw new Error('End time dropdown not found');
   
@@ -144,11 +106,6 @@ export async function POST(request: Request) {
           for (let j = 0; j < endTimeOptions.length; j++) {
             if (endTimeOptions[j][0] === endTimeString) {
               await endTimeDropdown.select((endTimeOptions as string[][])[j][1]);
-              // children = await endTimeDropdown?.$$('div');
-              // if (!children) continue;
-              // await children[j].evaluate((e) => e.click());
-  
-              // await endTimeDropdown?.waitForSelector('div')
               console.log(`[puppeteer] Selected end ${endTimeOptions[j][0]}`)
               done = true;
               break;

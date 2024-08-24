@@ -44,8 +44,6 @@ export function generateDateOptions(): {date: number, month: number, year: numbe
   const dates: {date: number, month: number, year: number, description: string}[] = [];
   const curDate: Date = new Date();
   curDate.setDate(curDate.getDate() + 3);
-  // DEBUG
-  // curDate.setDate(curDate.getDate() + 2);
   
   let day: string;
   let month: string;

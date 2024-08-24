@@ -3,10 +3,10 @@
 
 import CryptoJS from 'crypto-js';
 import { useState, useEffect } from 'react';
-import Loading from '@/components/loading';
 import { generateDateOptions, timeOptions, idToDescription } from '@/utils/dateTime'
 import { PuppeteerInfo, LoginInfo } from '@/types/api'
 
+import Loading from '@/components/loading';
 
 const dateOptions: { date: number, month: number, year: number, description: string }[] = generateDateOptions();
 
@@ -14,8 +14,6 @@ const dateOptions: { date: number, month: number, year: number, description: str
 export default function Home() {
   const [ids, setIds] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
-  // DEBUG
-  // const [authenticated, setAuthenticated] = useState<boolean>(true);
   const [authenticated, setAuthenticated] = useState<boolean>(false);
   const [orderString, setOrderString] = useState<string>('');
   
@@ -47,7 +45,6 @@ export default function Home() {
   const handleOrderChange = (e: React.FormEvent<HTMLInputElement>): void => {
     setOrderString((e.target as HTMLInputElement).value);
   }
-
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
     setLoading(true);
@@ -110,21 +107,6 @@ export default function Home() {
       courtOrder: courtOrder
     }
 
-    // DEBUG
-    // const sendImmediatelyRes: Response = await fetch('/api/puppeteer', {
-    //   method: 'POST',
-    //   headers: {
-    //     'Content-Type': 'application/json'
-    //   },
-    //   body: JSON.stringify(puppeteerInfo),
-    //   cache: 'no-cache'
-    // });
-    // if (!sendImmediatelyRes.ok) {
-    //   alert(`Puppeteer failed with error code ${sendImmediatelyRes.status}`);
-    //   setLoading(false);
-    //   return;
-    // }
-
     const scheduleRes: Response = await fetch('/api/schedule', {
       method: 'POST',
       headers: {
@@ -169,7 +151,6 @@ export default function Home() {
       setAuthenticated(true);
     }
   }
-
 
   return (
     <>
