@@ -96,36 +96,36 @@ export default function Home() {
       console.log(`[login] Successful login for ${username}`);
     }
     
-    const puppeteerInfo: PuppeteerInfo = {
-      username: username,
-      encryptedPassword: encryptedPassword,
-      date: date,
-      month: month,
-      year: year,
-      startTime: startTime,
-      endTime: endTime,
-      courtOrder: courtOrder
-    }
+    // const puppeteerInfo: PuppeteerInfo = {
+    //   username: username,
+    //   encryptedPassword: encryptedPassword,
+    //   date: date,
+    //   month: month,
+    //   year: year,
+    //   startTime: startTime,
+    //   endTime: endTime,
+    //   courtOrder: courtOrder
+    // }
 
-    const scheduleRes: Response = await fetch('/api/schedule', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(puppeteerInfo),
-      cache: 'no-cache'
-    })
-    if (scheduleRes.status === 403) {
-      alert(`Job already scheduled for ${dateOptions[dateIdx].description}`)
-      setLoading(false);
-      return;
-    } else if (!scheduleRes.ok) {
-      alert(`Scheduling failed with error code ${scheduleRes.status}`);
-      setLoading(false);
-      return;
-    }
+    // const scheduleRes: Response = await fetch('/api/schedule', {
+    //   method: 'POST',
+    //   headers: {
+    //     'Content-Type': 'application/json'
+    //   },
+    //   body: JSON.stringify(puppeteerInfo),
+    //   cache: 'no-cache'
+    // })
+    // if (scheduleRes.status === 403) {
+    //   alert(`Job already scheduled for ${dateOptions[dateIdx].description}`)
+    //   setLoading(false);
+    //   return;
+    // } else if (!scheduleRes.ok) {
+    //   alert(`Scheduling failed with error code ${scheduleRes.status}`);
+    //   setLoading(false);
+    //   return;
+    // }
 
-    await loadIds();
+    // await loadIds();
     setLoading(false);
   }
 
