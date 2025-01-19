@@ -2,7 +2,6 @@
 
 import { useRouter } from "next/navigation";
 
-
 export default function Auth() {
   const router = useRouter();
 
@@ -27,7 +26,7 @@ export default function Auth() {
 
   return (
     <>
-      <form onSubmit={ handleSubmit }>
+      <form onSubmit={handleSubmit}>
         <label htmlFor="password">Enter password:</label>
         <input type="password" id="password" />
         <button type="submit">Submit</button>
