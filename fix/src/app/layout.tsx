@@ -26,6 +26,7 @@ export default function RootLayout({
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        suppressHydrationWarning={true} // needed for any html-editing extensions (e.g., video speed controller)
       >
         {children}
       </body>
