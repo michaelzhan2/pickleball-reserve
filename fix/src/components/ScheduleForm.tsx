@@ -4,8 +4,23 @@ import { dateOptions, timeOptions } from "@/utils/dateTime";
 import { JSX } from "react";
 
 export default function ScheduleForm(): JSX.Element {
+  const onSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
+    e.preventDefault();
+    const target = e.target as HTMLFormElement;
+    const username = target.username.value;
+    const password = target.password.value;
+
+    await fetch("/api/checkLogin", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ username, password }),
+    });
+  }
+
   return (
-    <form>
+    <form onSubmit={onSubmit}>
       <label htmlFor="username">Username</label>
       <input type="text" id="username" name="username" />
       <label htmlFor="password">Password</label>
@@ -36,6 +51,7 @@ export default function ScheduleForm(): JSX.Element {
       </select>
       <label htmlFor="order">Court Order</label>
       <input type="text" id="order" name="order" defaultValue="1,2,3,4,5,6" />
+      <button type="submit">Submit</button>
     </form>
   )
 }
