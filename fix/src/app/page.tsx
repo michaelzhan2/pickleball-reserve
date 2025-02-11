@@ -2,7 +2,10 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
+
+import ScheduleForm from "@/components/ScheduleForm";
 
 function checkAuth(router: AppRouterInstance): void {
   fetch("/api/auth", {
@@ -24,7 +27,8 @@ export default function Home() {
 
   return (
     <>
-      <div>Hello world!</div>
+      <h1>Court Scheduler</h1>
+      <ScheduleForm />
     </>
   );
 }
