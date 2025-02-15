@@ -10,13 +10,19 @@ export default function ScheduleForm(): JSX.Element {
     const username = target.username.value;
     const password = target.password.value;
 
-    await fetch("/api/checkLogin", {
+    const response = await fetch("/api/checkLogin", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ username, password }),
     });
+    if (!response.ok) {
+      alert("Failed to login");
+      return;
+    }
+
+    // TODO: submit to scheduling
   }
 
   return (
